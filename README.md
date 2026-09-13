@@ -2,6 +2,7 @@
 
 ## Technical Documentation
 
+## RUN USING ```streamlit run app.py```
 This document explains the Buffer queue scheduling algorithm, including:
 
 - How users are divided into groups
