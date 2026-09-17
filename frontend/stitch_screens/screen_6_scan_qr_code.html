@@ -1,0 +1,274 @@
+<!DOCTYPE html><html lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'surface-container-lowest': '#ffffff', 'surface-tint': '#005db7', 'on-error-container': '#93000a', 'surface-container-high': '#e6e8eb', 'secondary-fixed-dim': '#b9c5f2', 'on-tertiary-fixed': '#001d32', 'on-tertiary-container': '#d2e7ff', 'on-tertiary': '#ffffff', 'primary-fixed': '#d6e3ff', 'error-container': '#ffdad6', 'surface-bright': '#f7f9fc', 'tertiary-fixed': '#cee5ff', 'secondary-fixed': '#dbe1ff', 'surface-container-highest': '#e0e3e6', 'inverse-primary': '#a9c7ff', 'inverse-on-surface': '#eff1f4', 'surface-container-low': '#f2f4f7', 'inverse-surface': '#2d3133', 'on-error': '#ffffff', 'on-secondary-fixed': '#0b1a3d', 'tertiary-container': '#006ba6', 'on-surface': '#191c1e', 'tertiary': '#005281', 'primary-fixed-dim': '#a9c7ff', 'outline-variant': '#c2c6d4', 'on-primary-fixed-variant': '#00468c', 'on-secondary-container': '#4c587f', 'surface': '#f7f9fc', 'on-surface-variant': '#424752', 'on-primary': '#ffffff', 'surface-container': '#eceef1', 'primary': '#004d99', 'on-secondary-fixed-variant': '#39456b', 'on-background': '#191c1e', 'secondary-container': '#c4d0fd', 'on-secondary': '#ffffff', 'on-tertiary-fixed-variant': '#004a75', 'background': '#f7f9fc', 'surface-dim': '#d8dadd', 'on-primary-fixed': '#001b3d', 'surface-variant': '#e0e3e6', 'on-primary-container': '#dae5ff', 'primary-container': '#1565c0', 'secondary': '#515d84', 'tertiary-fixed-dim': '#96ccff', 'error': '#ba1a1a', 'outline': '#727783' }, borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, spacing: { 'space-md': '1rem', 'margin-tablet': '1.5rem', 'space-lg': '1.5rem', 'gutter-sm': '0.5rem', 'space-xs': '0.25rem', 'gutter-lg': '1.5rem', 'space-xl': '2rem', 'margin': '1rem', 'margin-desktop': '2rem', 'gutter': '1rem', 'space-sm': '0.5rem' }, fontFamily: { 'title-sm': ['Roboto Flex'], 'display-md': ['Roboto Flex'], 'display-sm': ['Roboto Flex'], 'body-sm': ['Roboto Flex'], 'body-md': ['Roboto Flex'], 'label-md': ['Roboto Flex'], 'title-md': ['Roboto Flex'], 'headline-lg': ['Roboto Flex'], 'display-lg': ['Roboto Flex'], 'headline-sm': ['Roboto Flex'], 'headline-lg-mobile': ['Roboto Flex'], 'label-sm': ['Roboto Flex'], 'title-lg': ['Roboto Flex'], 'body-lg': ['Roboto Flex'], 'headline-md': ['Roboto Flex'], 'label-lg': ['Roboto Flex'] }, fontSize: { 'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0.1px', fontWeight: '600' }], 'display-md': ['45px', { lineHeight: '52px', letterSpacing: '0px', fontWeight: '400' }], 'display-sm': ['36px', { lineHeight: '44px', letterSpacing: '0px', fontWeight: '400' }], 'body-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.4px', fontWeight: '400' }], 'body-md': ['14px', { lineHeight: '20px', letterSpacing: '0.25px', fontWeight: '400' }], 'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.5px', fontWeight: '500' }], 'title-md': ['16px', { lineHeight: '24px', letterSpacing: '0.15px', fontWeight: '600' }], 'headline-lg': ['32px', { lineHeight: '40px', letterSpacing: '0px', fontWeight: '600' }], 'display-lg': ['57px', { lineHeight: '64px', letterSpacing: '-0.25px', fontWeight: '400' }], 'headline-sm': ['24px', { lineHeight: '32px', letterSpacing: '0px', fontWeight: '600' }], 'headline-lg-mobile': ['28px', { lineHeight: '36px', letterSpacing: '0px', fontWeight: '600' }], 'label-sm': ['11px', { lineHeight: '16px', letterSpacing: '0.5px', fontWeight: '500' }], 'title-lg': ['22px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '500' }], 'body-lg': ['16px', { lineHeight: '24px', letterSpacing: '0.5px', fontWeight: '400' }], 'headline-md': ['28px', { lineHeight: '36px', letterSpacing: '0px', fontWeight: '600' }], 'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0.1px', fontWeight: '500' }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><img alt="Buffer Universal Blue Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WmdiNwykDXHvU2MHpOgtmJMxAtnwnlOm1nq_v6dUsfdqDKBsoWEn47XKSj36qNvnVLORQ_NR90PR97GnoTttnSUJEszVF7tvoqrEO_Tcx3v0c6iv5ZOng-28Z1qA-FeKtLMDT-kv2pOjlJ4vxkn7tpUP1OLzap4qoCVWvr6RcZTy5aVF23CVU9sYvHFX3Nd64XUYCWnaJjhwsXoatFJCrjRqaBaUYhdcNn_uZopDW4yRgqmi8F2U_g25aK"><div class="flex items-center gap-space-xs"><span class="font-title-md text-title-md text-primary tracking-tight">Buffer</span><span class="hidden xs:inline-flex px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Universal Queue</span></div></div><div class="flex items-center gap-1"><button aria-label="Search" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">search</span></button><button aria-label="Notifications" class="w-11 h-11 relative flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full bg-error text-on-error font-label-sm text-[10px] leading-none flex items-center justify-center font-bold">3</span></button><button aria-label="User Profile" class="w-11 h-11 flex items-center justify-center rounded-full ml-space-xs hover:opacity-90 transition-opacity" type="button"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1V9rqmvWvG0MQjgbsVreECbzuPl2KZgbGn7HqCbuTYxvOv7wwuBD0pt-4jbM0YszMtFWtJ_jrfrh1sa3_Wv0y5gaBWtTBi0zrFqPGEFT_uM2rmgQiWcttQTNMKIHgg_jXOje0n5XwSdEpgYgAnUcnnoL-N0MUUfkwrHi_ACFP41eAw30itnNJWycFPCkc3rBIyw6Fvt6FF-VRBKBouA2UzSM1Iak0wK_aFHNVy3sdh0_vAmQl9qGCoT1fM"></button></div></div></header><main class="flex flex-col relative w-full pt-16 pb-24 bg-surface min-h-screen pb-28"><div class="flex flex-col w-full">
+<!-- Internal Context Header & Navigation -->
+<div class="w-full px-margin pt-space-xs pb-space-sm flex items-center justify-between">
+<button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface" type="button">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">qr_code_scanner</span>
+<span class="font-title-md text-title-md text-on-surface tracking-tight">Scan Buffer QR</span>
+</div>
+<button aria-label="Queue Help" class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant" type="button">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+</button>
+</div>
+<!-- Main Scanner Layout -->
+<div class="px-margin flex flex-col items-center">
+<!-- Screen Descriptive Framing -->
+<div class="text-center max-w-sm mt-space-xs mb-space-md">
+<h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Scan to join a queue</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 leading-snug">Point your camera at any Buffer QR code at restaurants, banks, clinics, or events.</p>
+</div>
+<!-- Active Precision Status Chip -->
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high shadow-sm mb-space-md transition-all">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold tracking-wide">Camera active · High precision scan</span>
+</div>
+<!-- Centerpiece QR Scanner Viewfinder -->
+<div class="relative w-full max-w-[320px] aspect-square rounded-[2rem] p-3 bg-inverse-surface shadow-xl flex items-center justify-center overflow-hidden">
+<!-- Darkened Camera Environment Simulation -->
+<div class="absolute inset-0 bg-gradient-to-b from-inverse-surface via-slate-900 to-inverse-surface opacity-95"></div>
+<!-- Vignette and Soft Scan Grid Lines -->
+<div class="absolute inset-0 opacity-15 bg-[radial-gradient(#1565c0_1px,transparent_1px)] [background-size:16px_16px]"></div>
+<!-- Corner Targeting Reticles (Primary Buffer Blue #1565C0) -->
+<div class="absolute top-5 left-5 w-8 h-8 pointer-events-none">
+<div class="absolute top-0 left-0 w-8 h-[3.5px] bg-primary-container rounded-full"></div>
+<div class="absolute top-0 left-0 w-[3.5px] h-8 bg-primary-container rounded-full"></div>
+</div>
+<div class="absolute top-5 right-5 w-8 h-8 pointer-events-none">
+<div class="absolute top-0 right-0 w-8 h-[3.5px] bg-primary-container rounded-full"></div>
+<div class="absolute top-0 right-0 w-[3.5px] h-8 bg-primary-container rounded-full"></div>
+</div>
+<div class="absolute bottom-5 left-5 w-8 h-8 pointer-events-none">
+<div class="absolute bottom-0 left-0 w-8 h-[3.5px] bg-primary-container rounded-full"></div>
+<div class="absolute bottom-0 left-0 w-[3.5px] h-8 bg-primary-container rounded-full"></div>
+</div>
+<div class="absolute bottom-5 right-5 w-8 h-8 pointer-events-none">
+<div class="absolute bottom-0 right-0 w-8 h-[3.5px] bg-primary-container rounded-full"></div>
+<div class="absolute bottom-0 right-0 w-[3.5px] h-8 bg-primary-container rounded-full"></div>
+</div>
+<!-- Animated Pulsing Laser Beam -->
+<div class="absolute left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-[#42A5F5] to-transparent shadow-[0_0_12px_#42A5F5] z-20 pointer-events-none transition-transform" id="scanLaser" style="top: 279.6px;"></div>
+<!-- Clean Simulated Buffer Partner QR Code Target -->
+<div class="relative z-10 w-44 h-44 p-3 bg-surface-container-lowest rounded-2xl shadow-md flex flex-col items-center justify-between group cursor-pointer active:scale-95 transition-transform" id="simulatedQr">
+<div class="w-full flex items-center justify-between px-1">
+<span class="font-label-sm text-[10px] text-primary font-bold uppercase tracking-wider">Buffer Live</span>
+<span class="flex h-1.5 w-1.5 rounded-full bg-primary"></span>
+</div>
+<!-- Simulated SVG QR Matrix -->
+<svg class="w-28 h-28 text-on-surface" fill="currentColor" viewBox="0 0 120 120">
+<!-- Top Left Position Detection Pattern -->
+<rect fill="#004d99" height="30" rx="4" width="30" x="10" y="10"></rect>
+<rect fill="#ffffff" height="18" rx="2" width="18" x="16" y="16"></rect>
+<rect fill="#004d99" height="10" rx="1" width="10" x="20" y="20"></rect>
+<!-- Top Right Position Detection Pattern -->
+<rect fill="#004d99" height="30" rx="4" width="30" x="80" y="10"></rect>
+<rect fill="#ffffff" height="18" rx="2" width="18" x="86" y="16"></rect>
+<rect fill="#004d99" height="10" rx="1" width="10" x="90" y="20"></rect>
+<!-- Bottom Left Position Detection Pattern -->
+<rect fill="#004d99" height="30" rx="4" width="30" x="10" y="80"></rect>
+<rect fill="#ffffff" height="18" rx="2" width="18" x="16" y="86"></rect>
+<rect fill="#004d99" height="10" rx="1" width="10" x="20" y="90"></rect>
+<!-- Stylized Data Matrix Blocks -->
+<rect height="8" rx="1.5" width="8" x="46" y="14"></rect>
+<rect height="8" rx="1.5" width="8" x="58" y="14"></rect>
+<rect height="6" rx="1" width="6" x="68" y="22"></rect>
+<rect height="14" rx="1.5" width="6" x="46" y="28"></rect>
+<rect height="6" rx="1" width="12" x="58" y="32"></rect>
+<rect height="8" rx="1.5" width="10" x="14" y="48"></rect>
+<rect height="12" rx="1.5" width="8" x="30" y="48"></rect>
+<rect fill="#1565C0" height="10" rx="2" width="10" x="44" y="50"></rect>
+<rect height="8" rx="1.5" width="8" x="60" y="46"></rect>
+<rect height="6" rx="1" width="14" x="74" y="48"></rect>
+<rect height="10" rx="1.5" width="14" x="94" y="50"></rect>
+<rect height="6" rx="1" width="14" x="24" y="66"></rect>
+<rect height="12" rx="2" width="12" x="44" y="66"></rect>
+<rect height="16" rx="1.5" width="8" x="62" y="62"></rect>
+<rect height="8" rx="1" width="6" x="76" y="62"></rect>
+<rect height="8" rx="1.5" width="16" x="88" y="66"></rect>
+<rect height="12" rx="1.5" width="8" x="48" y="84"></rect>
+<rect height="8" rx="1.5" width="12" x="62" y="84"></rect>
+<rect height="8" rx="1.5" width="8" x="80" y="82"></rect>
+<rect height="14" rx="2" width="12" x="94" y="82"></rect>
+<rect height="8" rx="1.5" width="18" x="56" y="98"></rect>
+<rect height="10" rx="1.5" width="10" x="80" y="96"></rect>
+</svg>
+<div class="text-center w-full px-1">
+<p class="font-title-sm text-[11px] text-on-surface truncate font-semibold">Blue Bean Cafe</p>
+<span class="inline-block px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-[9px]">Table Queue</span>
+</div>
+</div>
+</div>
+<!-- Assisted Alignment Instruction -->
+<p class="font-body-md text-body-md text-on-surface-variant text-center mt-3 max-w-xs">
+      Align the QR code inside the frame to scan automatically
+    </p>
+<!-- Quick Utilities Row: Flashlight Toggle & Gallery Upload -->
+<div class="flex items-center gap-space-lg my-space-md">
+<div class="flex flex-col items-center">
+<button aria-label="Toggle Flashlight" class="w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high active:bg-secondary-container transition-all flex items-center justify-center text-on-surface" id="torchBtn" type="button">
+<span class="material-symbols-outlined text-[24px]" id="torchIcon">flash_on</span>
+</button>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1.5" id="torchLabel">Flashlight</span>
+</div>
+<div class="flex flex-col items-center">
+<button aria-label="Upload from Gallery" class="w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high active:bg-secondary-container transition-all flex items-center justify-center text-on-surface" id="galleryBtn" type="button">
+<span class="material-symbols-outlined text-[24px]">photo_library</span>
+</button>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1.5">Upload image</span>
+</div>
+<div class="flex flex-col items-center">
+<button aria-label="Re-center Viewfinder" class="w-12 h-12 rounded-full bg-surface-container hover:bg-surface-container-high active:bg-secondary-container transition-all flex items-center justify-center text-on-surface" id="refreshCamBtn" type="button">
+<span class="material-symbols-outlined text-[24px]">flip_camera_ios</span>
+</button>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1.5">Flip lens</span>
+</div>
+</div>
+<!-- Secondary Option: Manual Code Entry Card -->
+<div class="w-full max-w-md bg-surface-container-low rounded-2xl p-space-md shadow-sm mb-space-md">
+<div class="flex items-center gap-space-sm mb-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant">
+<span class="material-symbols-outlined text-[18px]">dialpad</span>
+</div>
+<div>
+<h2 class="font-title-sm text-title-sm text-on-surface">Have a queue code?</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Enter the 6-character kiosk code</p>
+</div>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="relative w-full">
+<input class="w-full h-12 px-4 bg-surface-container-lowest rounded-lg font-title-md text-title-md text-on-surface placeholder:text-outline tracking-wider uppercase focus:outline-none focus:bg-surface-container-lowest shadow-inner" id="queueCodeInput" maxlength="8" placeholder="e.g. BBC-402" style="letter-spacing: 0.15em;" type="text">
+<button aria-label="Clear input" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-surface-container text-on-surface-variant items-center justify-center" id="clearCodeBtn" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<button class="w-full h-12 px-6 rounded-full bg-primary hover:bg-primary-container active:scale-[0.99] transition-all text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-sm" id="continueCodeBtn" type="button">
+<span class="">Continue</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Feedback / Scan Success Simulation Toast Overlay -->
+<div class="hidden w-full max-w-md bg-secondary-container text-on-secondary-container p-space-sm rounded-xl shadow-md mb-space-sm items-center justify-between transition-all" id="scanResultToast">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-primary text-[22px]">check_circle</span>
+<div class="min-w-0">
+<p class="font-title-sm text-title-sm truncate">Blue Bean Cafe detected!</p>
+<p class="font-body-sm text-body-sm opacity-80 truncate">Est. wait: 14 mins (4 groups ahead)</p>
+</div>
+</div>
+<button class="px-3 py-1 bg-primary text-on-primary rounded-full font-label-sm text-label-sm font-semibold" type="button">
+        Join
+      </button>
+</div>
+<!-- Permissions / Error Hints Banner -->
+<div class="w-full max-w-md p-space-sm rounded-xl bg-surface-container flex items-start gap-2.5 mb-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-tertiary shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm leading-relaxed">
+        Allow camera permissions if prompted for instant token generation. Buffer processes QR links client-side to ensure rapid check-ins.
+      </p>
+</div>
+</div>
+<!-- Inline Micro-interactions & Laser Scanner Animation -->
+<script>
+    (function() {
+      // Continuous Scanner Laser Movement
+      const laser = document.getElementById('scanLaser');
+      let direction = 1;
+      let position = 20;
+      const minPos = 24;
+      const maxPos = 296;
+
+      function animateLaser() {
+        position += direction * 2.2;
+        if (position >= maxPos) {
+          direction = -1;
+        } else if (position <= minPos) {
+          direction = 1;
+        }
+        if (laser) {
+          laser.style.top = position + 'px';
+        }
+        requestAnimationFrame(animateLaser);
+      }
+      requestAnimationFrame(animateLaser);
+
+      // Torch Toggle Simulation
+      const torchBtn = document.getElementById('torchBtn');
+      const torchIcon = document.getElementById('torchIcon');
+      const torchLabel = document.getElementById('torchLabel');
+      let isTorchOn = false;
+
+      if (torchBtn) {
+        torchBtn.addEventListener('click', () => {
+          isTorchOn = !isTorchOn;
+          if (isTorchOn) {
+            torchBtn.classList.remove('bg-surface-container');
+            torchBtn.classList.add('bg-primary', 'text-on-primary');
+            torchIcon.textContent = 'flash_off';
+            torchLabel.textContent = 'Light On';
+          } else {
+            torchBtn.classList.remove('bg-primary', 'text-on-primary');
+            torchBtn.classList.add('bg-surface-container');
+            torchIcon.textContent = 'flash_on';
+            torchLabel.textContent = 'Flashlight';
+          }
+        });
+      }
+
+      // Simulated QR Tap Scan Detection
+      const qrTarget = document.getElementById('simulatedQr');
+      const scanToast = document.getElementById('scanResultToast');
+
+      if (qrTarget && scanToast) {
+        qrTarget.addEventListener('click', () => {
+          scanToast.classList.remove('hidden');
+          scanToast.classList.add('flex');
+          scanToast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      }
+
+      // Manual Input Clear Button Handling
+      const input = document.getElementById('queueCodeInput');
+      const clearBtn = document.getElementById('clearCodeBtn');
+
+      if (input && clearBtn) {
+        input.addEventListener('input', (e) => {
+          if (e.target.value.length > 0) {
+            clearBtn.classList.remove('hidden');
+            clearBtn.classList.add('flex');
+          } else {
+            clearBtn.classList.remove('flex');
+            clearBtn.classList.add('hidden');
+          }
+        });
+
+        clearBtn.addEventListener('click', () => {
+          input.value = '';
+          clearBtn.classList.remove('flex');
+          clearBtn.classList.add('hidden');
+          input.focus();
+        });
+      }
+
+      // Gallery button micro-hint
+      const galleryBtn = document.getElementById('galleryBtn');
+      if (galleryBtn) {
+        galleryBtn.addEventListener('click', () => {
+          alert('Photo library picker activated. Select a saved QR image.');
+        });
+      }
+    })();
+  </script>
+</div></main><nav class="fixed bottom-0 left-0 right-0 z-50 w-full bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.04)]"><div class="max-w-md mx-auto h-16 flex items-center justify-around px-2"><a href="#" data-path="home" class="flex flex-col items-center justify-center flex-1 h-full py-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-sm text-[10px] tracking-tight truncate mt-1">Home</span></a><a href="#" data-path="my-queues" class="flex flex-col items-center justify-center flex-1 h-full py-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[22px]">confirmation_number</span><span class="font-label-sm text-[10px] tracking-tight truncate mt-1">My Queues</span></a><a href="#" data-path="scan-qr" aria-current="page" class="flex flex-col items-center justify-center flex-1 h-full py-1 text-primary transition-colors relative"><div class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">qr_code_scanner</span></div><span class="font-label-sm text-[10px] font-semibold text-primary mt-0.5 tracking-tight flex items-center gap-1">Scan QR</span></a><a href="#" data-path="notifications" class="flex flex-col items-center justify-center flex-1 h-full py-1 text-on-surface-variant hover:text-primary transition-colors relative"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-0 right-0 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></div><span class="font-label-sm text-[10px] tracking-tight truncate mt-1">Alerts</span></a><a href="#" data-path="user-profile" class="flex flex-col items-center justify-center flex-1 h-full py-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[22px]">person</span><span class="font-label-sm text-[10px] tracking-tight truncate mt-1">Profile</span></a></div></nav>
+
+</body></html>

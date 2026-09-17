@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>
+@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+@keyframes rippleGlow {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 93, 183, 0.45); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 93, 183, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 93, 183, 0); }
+}
+.animate-ripple {
+  animation: rippleGlow 2.2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.animate-pulse-subtle {
+  animation: pulseSubtle 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'surface-container-lowest': '#ffffff', 'surface-tint': '#005db7', 'on-error-container': '#93000a', 'surface-container-high': '#e6e8eb', 'secondary-fixed-dim': '#b9c5f2', 'on-tertiary-fixed': '#001d32', 'on-tertiary-container': '#d2e7ff', 'on-tertiary': '#ffffff', 'primary-fixed': '#d6e3ff', 'error-container': '#ffdad6', 'surface-bright': '#f7f9fc', 'tertiary-fixed': '#cee5ff', 'secondary-fixed': '#dbe1ff', 'surface-container-highest': '#e0e3e6', 'inverse-primary': '#a9c7ff', 'inverse-on-surface': '#eff1f4', 'surface-container-low': '#f2f4f7', 'inverse-surface': '#2d3133', 'on-error': '#ffffff', 'on-secondary-fixed': '#0b1a3d', 'tertiary-container': '#006ba6', 'on-surface': '#191c1e', 'tertiary': '#005281', 'primary-fixed-dim': '#a9c7ff', 'outline-variant': '#c2c6d4', 'on-primary-fixed-variant': '#00468c', 'on-secondary-container': '#4c587f', 'surface': '#f7f9fc', 'on-surface-variant': '#424752', 'on-primary': '#ffffff', 'surface-container': '#eceef1', 'primary': '#004d99', 'on-secondary-fixed-variant': '#39456b', 'on-background': '#191c1e', 'secondary-container': '#c4d0fd', 'on-secondary': '#ffffff', 'on-tertiary-fixed-variant': '#004a75', 'background': '#f7f9fc', 'surface-dim': '#d8dadd', 'on-primary-fixed': '#001b3d', 'surface-variant': '#e0e3e6', 'on-primary-container': '#dae5ff', 'primary-container': '#1565c0', 'secondary': '#515d84', 'tertiary-fixed-dim': '#96ccff', 'error': '#ba1a1a', 'outline': '#727783' }, borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', '2xl': '1.25rem', 'full': '9999px' }, spacing: { 'space-md': '1rem', 'margin-tablet': '1.5rem', 'space-lg': '1.5rem', 'gutter-sm': '0.5rem', 'space-xs': '0.25rem', 'gutter-lg': '1.5rem', 'space-xl': '2rem', 'margin': '1rem', 'margin-desktop': '2rem', 'gutter': '1rem', 'space-sm': '0.5rem' }, fontFamily: { 'title-sm': ['Roboto Flex'], 'display-md': ['Roboto Flex'], 'display-sm': ['Roboto Flex'], 'body-sm': ['Roboto Flex'], 'body-md': ['Roboto Flex'], 'label-md': ['Roboto Flex'], 'title-md': ['Roboto Flex'], 'headline-lg': ['Roboto Flex'], 'display-lg': ['Roboto Flex'], 'headline-sm': ['Roboto Flex'], 'headline-lg-mobile': ['Roboto Flex'], 'label-sm': ['Roboto Flex'], 'title-lg': ['Roboto Flex'], 'body-lg': ['Roboto Flex'], 'headline-md': ['Roboto Flex'], 'label-lg': ['Roboto Flex'] }, fontSize: { 'title-sm': ['14px', { lineHeight: '20px', letterSpacing: '0.1px', fontWeight: '600' }], 'display-md': ['45px', { lineHeight: '52px', letterSpacing: '0px', fontWeight: '400' }], 'display-sm': ['36px', { lineHeight: '44px', letterSpacing: '0px', fontWeight: '400' }], 'body-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.4px', fontWeight: '400' }], 'body-md': ['14px', { lineHeight: '20px', letterSpacing: '0.25px', fontWeight: '400' }], 'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.5px', fontWeight: '500' }], 'title-md': ['16px', { lineHeight: '24px', letterSpacing: '0.15px', fontWeight: '600' }], 'headline-lg': ['32px', { lineHeight: '40px', letterSpacing: '0px', fontWeight: '600' }], 'display-lg': ['57px', { lineHeight: '64px', letterSpacing: '-0.25px', fontWeight: '400' }], 'headline-sm': ['24px', { lineHeight: '32px', letterSpacing: '0px', fontWeight: '600' }], 'headline-lg-mobile': ['28px', { lineHeight: '36px', letterSpacing: '0px', fontWeight: '600' }], 'label-sm': ['11px', { lineHeight: '16px', letterSpacing: '0.5px', fontWeight: '500' }], 'title-lg': ['22px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '500' }], 'body-lg': ['16px', { lineHeight: '24px', letterSpacing: '0.5px', fontWeight: '400' }], 'headline-md': ['28px', { lineHeight: '36px', letterSpacing: '0px', fontWeight: '600' }], 'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0.1px', fontWeight: '500' }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-fixed"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-surface-container"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Go back" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container active:scale-95 transition-all" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="Buffer Universal Blue Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WmdiNwykDXHvU2MHpOgtmJMxAtnwnlOm1nq_v6dUsfdqDKBsoWEn47XKSj36qNvnVLORQ_NR90PR97GnoTttnSUJEszVF7tvoqrEO_Tcx3v0c6iv5ZOng-28Z1qA-FeKtLMDT-kv2pOjlJ4vxkn7tpUP1OLzap4qoCVWvr6RcZTy5aVF23CVU9sYvHFX3Nd64XUYCWnaJjhwsXoatFJCrjRqaBaUYhdcNn_uZopDW4yRgqmi8F2U_g25aK"/><div class="flex flex-col ml-1"><h1 class="font-title-md text-title-md text-on-surface truncate leading-tight">Active Queue Ticket</h1><span class="font-label-sm text-[10px] tracking-wide text-primary font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> PASS #BB-4209</span></div></div><div class="flex items-center gap-1.5"><button aria-label="Haptic alerts enabled" class="w-8 h-8 rounded-full flex items-center justify-center text-primary bg-primary-fixed/60" title="Sound &amp; Haptics Enabled"><span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">vibration</span></button><img alt="Profile" class="w-8 h-8 rounded-full object-cover ml-0.5 ring-2 ring-surface-container-highest" src="https://lh3.googleusercontent.com/aida/AEtjO1V9rqmvWvG0MQjgbsVreECbzuPl2KZgbGn7HqCbuTYxvOv7wwuBD0pt-4jbM0YszMtFWtJ_jrfrh1sa3_Wv0y5gaBWtTBi0zrFqPGEFT_uM2rmgQiWcttQTNMKIHgg_jXOje0n5XwSdEpgYgAnUcnnoL-N0MUUfkwrHi_ACFP41eAw30itnNJWycFPCkc3rBIyw6Fvt6FF-VRBKBouA2UzSM1Iak0wK_aFHNVy3sdh0_vAmQl9qGCoT1fM"/></div></div></header><main class="flex flex-col relative w-full pt-16 bg-surface min-h-screen pb-safe"><div class="flex flex-col w-full pb-8">
+<!-- Interactive Top Action Sub-bar with Live Pulse Capsule -->
+<div class="flex items-center justify-between px-margin py-2.5 bg-surface/80">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-secondary-container/90 to-primary-fixed/70 text-on-secondary-container shadow-sm border border-white/60">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary shadow-sm"></span>
+</span>
+<span class="font-label-sm text-label-sm font-semibold tracking-tight text-on-secondary-fixed">Connected to Queue Ledger</span>
+<span class="text-[11px] font-mono text-primary font-bold ml-0.5 bg-surface-container-lowest/80 px-1.5 py-0.2 rounded">LIVE</span>
+</div>
+<div class="flex items-center gap-1.5">
+<button aria-label="Share ticket" class="w-9 h-9 rounded-full flex items-center justify-center bg-surface-container-lowest border border-outline-variant/30 text-primary shadow-xs hover:bg-surface-container transition-all active:scale-90" id="shareBtn" type="button">
+<span class="material-symbols-outlined text-[19px]">share</span>
+</button>
+<button aria-label="More options" class="w-9 h-9 rounded-full flex items-center justify-center bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant shadow-xs hover:bg-surface-container transition-all active:scale-90" id="moreMenuBtn" type="button">
+<span class="material-symbols-outlined text-[19px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="px-margin flex flex-col gap-space-md">
+<!-- Live Updates Context Notification Banner -->
+<div class="relative overflow-hidden flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-primary-fixed via-primary-fixed/90 to-secondary-fixed/50 text-on-primary-fixed-variant shadow-sm border border-primary-fixed-dim/40">
+<div class="w-9 h-9 rounded-xl bg-surface-container-lowest flex items-center justify-center shrink-0 shadow-xs text-primary">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-title-sm text-[13px] text-on-primary-fixed font-bold leading-none">Queue flowing smoothly</span>
+<span class="text-[10px] uppercase font-bold text-primary bg-primary-fixed-dim/50 px-1.5 py-0.5 rounded-full">Automated Haptics</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-primary-fixed-variant mt-1 leading-snug">Phone will buzz &amp; sound chime when Token <strong class="font-title-sm text-title-sm text-primary font-bold">B-042</strong> is summoned.</p>
+</div>
+</div>
+<!-- HERO TACTILE DIGITAL QUEUE PASS CARD -->
+<div class="relative flex flex-col rounded-2xl bg-surface-container-lowest shadow-[0_8px_24px_rgba(0,77,153,0.08),0_2px_6px_rgba(0,0,0,0.04)] border border-outline-variant/30 overflow-hidden">
+<!-- Top Bar with Airline Pass Accent Stripe -->
+<div class="h-1.5 w-full bg-gradient-to-r from-primary via-primary-container to-secondary"></div>
+<!-- Venue & Service Header Section -->
+<div class="p-space-md pb-4 flex flex-col gap-2.5 bg-gradient-to-b from-surface-container-low/70 to-surface-container-lowest">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-xl bg-primary-container text-white flex items-center justify-center font-bold text-base shadow-sm">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">local_cafe</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-on-surface font-bold tracking-tight">Blue Bean Cafe</span>
+<span class="material-symbols-outlined text-primary text-[15px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<span class="font-label-sm text-[11px] text-secondary font-medium">City Centre Branch · Host Stand #2</span>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-secondary-container/90 text-on-secondary-container font-label-sm text-[11px] font-bold shadow-xs border border-secondary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> Waiting
+</span>
+</div>
+<div class="flex items-center justify-between pt-1 border-t border-surface-container-high/60">
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">table_restaurant</span>
+<span>Table Reservation (2–4 Guests)</span>
+</div>
+<span class="text-[11px] font-mono font-medium text-secondary bg-surface-container px-2 py-0.5 rounded">ZONE B</span>
+</div>
+</div>
+<!-- Distinctive Airline / Ticket Cutout Notch Divider -->
+<div class="relative w-full h-6 bg-surface-container-lowest flex items-center justify-between">
+<!-- Left Cutout Arc with Realistic Shadow -->
+<div class="w-6 h-6 rounded-r-full bg-surface border-r border-t border-b border-outline-variant/30 -ml-3 shadow-[inset_-2px_0_3px_rgba(0,0,0,0.06)] z-10"></div>
+<!-- Tear-line Dashed Separator -->
+<div class="flex-1 border-b-2 border-dashed border-outline-variant/50 mx-2"></div>
+<!-- Right Cutout Arc with Realistic Shadow -->
+<div class="w-6 h-6 rounded-l-full bg-surface border-l border-t border-b border-outline-variant/30 -mr-3 shadow-[inset_2px_0_3px_rgba(0,0,0,0.06)] z-10"></div>
+</div>
+<!-- Primary Token Display Stage -->
+<div class="pt-2 pb-5 px-space-md flex flex-col items-center justify-center text-center bg-gradient-to-b from-surface-container-lowest to-primary-fixed/20">
+<div class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-[11px] font-bold uppercase tracking-widest mb-1 border border-primary/20">
+<span class="material-symbols-outlined text-[13px]">confirmation_number</span> Your Live Token
+</div>
+<div class="font-display-md text-[52px] leading-tight text-primary font-black my-0.5 tracking-tight drop-shadow-[0_2px_8px_rgba(0,77,153,0.18)]">
+B-042
+</div>
+<!-- Digital Barcode / Scan Stripe Simulation for High-tech Pass aesthetic -->
+<div aria-label="Digital barcode" class="flex items-center justify-center gap-1 my-2 opacity-80">
+<span class="h-6 w-1 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-0.5 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-2 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-1 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-0.5 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-3 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-1.5 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-0.5 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-2 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-1 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-2.5 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-0.5 bg-on-surface-variant rounded-full"></span>
+<span class="h-6 w-1.5 bg-on-surface-variant rounded-full"></span>
+</div>
+<!-- Estimated Service Pill with Countdown Badge -->
+<div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container-lowest shadow-sm border border-outline-variant/40 mt-1">
+<span class="material-symbols-outlined text-[17px] text-primary" style="font-variation-settings: 'FILL' 1;">schedule</span>
+<span class="font-title-sm text-[13px] text-on-surface font-semibold">Est. Service: <span class="text-primary font-bold">11:20 AM</span></span>
+<span class="h-3 w-[1px] bg-outline-variant"></span>
+<span class="text-[11px] font-bold text-secondary font-mono">in ~25 min</span>
+</div>
+</div>
+</div>
+<!-- 3 Core Operational Metrics Cards -->
+<div class="grid grid-cols-3 gap-2.5">
+<div class="flex flex-col items-center text-center p-3 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 relative overflow-hidden">
+<div class="absolute top-0 inset-x-0 h-1 bg-primary"></div>
+<span class="font-label-sm text-[11px] text-on-surface-variant font-medium">Now Calling</span>
+<span class="font-headline-sm text-[22px] text-primary my-0.5 font-bold tracking-tight">B-036</span>
+<span class="font-label-sm text-[10px] text-secondary truncate max-w-full font-medium">Desk 1 · Indoor</span>
+</div>
+<div class="flex flex-col items-center text-center p-3 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 relative overflow-hidden">
+<div class="absolute top-0 inset-x-0 h-1 bg-secondary"></div>
+<span class="font-label-sm text-[11px] text-on-surface-variant font-medium">Ahead of You</span>
+<div class="flex items-baseline gap-1 my-0.5">
+<span class="font-headline-sm text-[22px] text-on-surface font-bold tracking-tight">6</span>
+<span class="text-[11px] text-secondary font-medium">parties</span>
+</div>
+<!-- Micro Progress Bar -->
+<div class="w-full bg-surface-container rounded-full h-1.5 mt-1 overflow-hidden">
+<div class="bg-secondary-container h-1.5 rounded-full" style="width: 55%"></div>
+</div>
+</div>
+<div class="flex flex-col items-center text-center p-3 rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/20 relative overflow-hidden">
+<div class="absolute top-0 inset-x-0 h-1 bg-primary-container"></div>
+<span class="font-label-sm text-[11px] text-on-surface-variant font-medium">Est. Wait</span>
+<div class="flex items-baseline gap-0.5 my-0.5">
+<span class="font-headline-sm text-[22px] text-primary-container font-bold tracking-tight">25</span>
+<span class="text-[12px] font-semibold text-on-surface-variant">m</span>
+</div>
+<span class="font-label-sm text-[10px] text-secondary font-medium">~4 min / party</span>
+</div>
+</div>
+<!-- Queue Progress Stepper (Timeline) -->
+<div class="flex flex-col p-space-md rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/25">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">linear_scale</span>
+<span class="font-title-md text-title-md text-on-surface font-bold">Queue Progress</span>
+</div>
+<span class="font-label-sm text-[11px] text-primary bg-primary-fixed px-2.5 py-1 rounded-full font-bold border border-primary/20">Stage 3 of 6</span>
+</div>
+<div class="flex flex-col">
+<!-- Stage 1: Done -->
+<div class="flex items-start gap-3 relative pb-5">
+<div class="absolute left-3.5 top-7 bottom-0 w-0.5 bg-primary"></div>
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm z-10">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+<div class="flex flex-col flex-1 pt-0.5">
+<div class="flex items-center justify-between">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">Queue joined</span>
+<span class="font-mono text-[11px] text-on-surface-variant font-medium">10:40 AM</span>
+</div>
+<span class="font-body-sm text-[12px] text-secondary">Registered via Mobile Check-in</span>
+</div>
+</div>
+<!-- Stage 2: Done -->
+<div class="flex items-start gap-3 relative pb-5">
+<div class="absolute left-3.5 top-7 bottom-0 w-0.5 bg-primary"></div>
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm z-10">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+<div class="flex flex-col flex-1 pt-0.5">
+<div class="flex items-center justify-between">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">Token assigned</span>
+<span class="font-mono text-[11px] text-on-surface-variant font-medium">10:46 AM</span>
+</div>
+<span class="font-body-sm text-[12px] text-secondary">Pass B-042 allocated for Main Dining</span>
+</div>
+</div>
+<!-- Stage 3: Active Pulsing Step -->
+<div class="flex items-start gap-3 relative pb-5">
+<div class="absolute left-3.5 top-7 bottom-0 w-0.5 bg-surface-container-highest"></div>
+<div class="relative w-7 h-7 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0 shadow-md z-10 animate-ripple ring-4 ring-primary-fixed">
+<span class="material-symbols-outlined text-[15px] text-on-primary animate-spin" style="animation-duration: 4s;">hourglass_top</span>
+</div>
+<div class="flex flex-col flex-1 bg-gradient-to-r from-primary-fixed/40 to-surface-container-low p-3 rounded-xl border border-primary-fixed-dim/60 shadow-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-title-sm text-title-sm text-primary font-bold">Waiting in queue</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+</div>
+<span class="font-label-sm text-[10px] text-primary font-bold uppercase tracking-wider bg-white px-2 py-0.5 rounded-full shadow-xs">Active Now</span>
+</div>
+<span class="font-body-sm text-[12px] text-on-surface-variant mt-1">6 parties ahead · Host pacing table turnover</span>
+</div>
+</div>
+<!-- Stage 4: Upcoming -->
+<div class="flex items-start gap-3 relative pb-5">
+<div class="absolute left-3.5 top-7 bottom-0 w-0.5 bg-surface-container-highest"></div>
+<div class="w-7 h-7 rounded-full bg-surface-container-low border border-outline-variant text-outline flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[16px]">campaign</span>
+</div>
+<div class="flex flex-col flex-1 opacity-75 pt-0.5">
+<span class="font-title-sm text-title-sm text-on-surface font-medium">Token called</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant">Audible chime, screen flash &amp; SMS notification</span>
+</div>
+</div>
+<!-- Stage 5: Upcoming -->
+<div class="flex items-start gap-3 relative pb-5">
+<div class="absolute left-3.5 top-7 bottom-0 w-0.5 bg-surface-container-highest"></div>
+<div class="w-7 h-7 rounded-full bg-surface-container-low border border-outline-variant text-outline flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[16px]">room_service</span>
+</div>
+<div class="flex flex-col flex-1 opacity-60 pt-0.5">
+<span class="font-title-sm text-title-sm text-on-surface font-medium">Serving at table</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant">Host escort to Window Booth #4</span>
+</div>
+</div>
+<!-- Stage 6: Upcoming Final -->
+<div class="flex items-start gap-3 relative">
+<div class="w-7 h-7 rounded-full bg-surface-container-low border border-outline-variant text-outline flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-[16px]">sentiment_very_satisfied</span>
+</div>
+<div class="flex flex-col flex-1 opacity-45 pt-0.5">
+<span class="font-title-sm text-title-sm text-on-surface font-medium">Service completed</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant">Dining experience complete</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Enhanced Venue Location & Guidance Mini-Map Card -->
+<div class="flex flex-col p-space-md rounded-2xl bg-surface-container-lowest shadow-sm border border-outline-variant/25 gap-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[22px]">storefront</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-[15px] text-on-surface font-bold truncate">Blue Bean Cafe · Table Host</span>
+<span class="text-[10px] bg-secondary-fixed text-on-secondary-fixed font-bold px-1.5 py-0.2 rounded">180m</span>
+</div>
+<span class="font-body-sm text-[12px] text-on-surface-variant truncate">74 Market Street, City Centre District</span>
+</div>
+</div>
+<!-- Interactive Mini Walking Route Ribbon -->
+<div class="flex items-center justify-between px-3 py-2 rounded-xl bg-surface-container-low/80 border border-surface-container-high text-[12px] text-on-surface-variant">
+<div class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-primary">directions_walk</span>
+<span>~2 min walk from your current location</span>
+</div>
+<span class="text-primary font-bold text-[11px]">On Track</span>
+</div>
+<button class="w-full h-11 rounded-full bg-surface-container-low hover:bg-surface-container text-primary font-title-sm text-title-sm flex items-center justify-center gap-2 transition-all border border-outline-variant/30 active:scale-[0.99] shadow-xs" type="button">
+<span class="material-symbols-outlined text-[19px]">directions</span>
+<span>View Directions &amp; Walking Map</span>
+</button>
+</div>
+<!-- Tactile Action Buttons -->
+<div class="flex flex-col gap-2.5 mt-1">
+<button class="w-full h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center gap-2 shadow-sm hover:brightness-105 active:scale-[0.99] transition-all font-title-sm text-title-sm font-semibold border border-secondary-fixed-dim/60" type="button">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+<span>Contact Host / Business Support</span>
+</button>
+<button class="w-full h-12 rounded-full bg-error-container/80 text-on-error-container flex items-center justify-center gap-2 shadow-xs hover:bg-error-container active:scale-[0.99] transition-all font-title-sm text-title-sm font-semibold border border-error/20" id="cancelQueueBtn" type="button">
+<span class="material-symbols-outlined text-[20px]">cancel</span>
+<span>Cancel Queue Position</span>
+</button>
+</div>
+<!-- Live Sync Footer with Auto-refresh animation -->
+<div class="flex items-center justify-center gap-2 text-center py-2 cursor-pointer select-none group" id="manualSyncRow">
+<span class="material-symbols-outlined text-[16px] text-secondary group-hover:text-primary transition-transform duration-700" id="syncIcon">sync</span>
+<span class="font-body-sm text-[12px] text-secondary group-hover:text-on-surface">Syncs automatically every 5 seconds · <span class="underline font-medium">Tap to refresh</span></span>
+</div>
+</div>
+<!-- Cancel Confirmation Bottom Sheet Dialog (Hidden by Default) -->
+<div class="hidden fixed inset-0 z-50 flex items-end justify-center bg-inverse-surface/40 backdrop-blur-sm p-4 transition-opacity duration-200" id="cancelModal">
+<div class="w-full max-w-sm rounded-2xl bg-surface-container-lowest p-space-lg flex flex-col gap-space-md shadow-2xl border border-outline-variant/30">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-2xl bg-error-container text-error flex items-center justify-center shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[24px]">warning</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-bold">Leave Queue?</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">You will forfeit Token B-042.</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        You are currently 6th in line. If you leave, you will have to re-register when you return.
+      </p>
+<div class="flex flex-col gap-2.5 mt-2">
+<button class="w-full h-11 rounded-full bg-error text-on-error font-title-sm text-title-sm shadow-sm active:scale-95 transition-transform font-bold" id="confirmCancelBtn" type="button">
+          Yes, Cancel My Spot
+        </button>
+<button class="w-full h-11 rounded-full bg-surface-container text-on-surface font-title-sm text-title-sm shadow-xs active:scale-95 transition-transform" id="closeModalBtn" type="button">
+          Stay in Line
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Manual sync rotation interaction
+    const syncRow = document.getElementById('manualSyncRow');
+    const syncIcon = document.getElementById('syncIcon');
+    if (syncRow && syncIcon) {
+      syncRow.addEventListener('click', () => {
+        syncIcon.classList.add('rotate-180');
+        setTimeout(() => syncIcon.classList.remove('rotate-180'), 700);
+      });
+    }
+
+    // Cancel modal dialog toggles
+    const cancelBtn = document.getElementById('cancelQueueBtn');
+    const cancelModal = document.getElementById('cancelModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+    if (cancelBtn && cancelModal && closeModalBtn && confirmCancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        cancelModal.classList.remove('hidden');
+      });
+
+      closeModalBtn.addEventListener('click', () => {
+        cancelModal.classList.add('hidden');
+      });
+
+      confirmCancelBtn.addEventListener('click', () => {
+        cancelModal.classList.add('hidden');
+        alert('Queue position B-042 successfully released.');
+      });
+    }
+
+    // Native Web Share API trigger
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'Live Queue Ticket - B-042',
+              text: 'Blue Bean Cafe - Table Queue (Est. 11:20 AM)',
+              url: window.location.href,
+            });
+          } catch (err) {
+            // Handled share dismissal silently
+          }
+        } else {
+          alert('Queue Ticket URL copied to clipboard.');
+        }
+      });
+    }
+  })();
+</script></main></body></html>
