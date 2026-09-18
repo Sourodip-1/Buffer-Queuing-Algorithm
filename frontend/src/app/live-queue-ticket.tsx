@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import BottomNavBar from '../components/bottom-nav-bar';
 
 export default function LiveQueueTicket() {
   const router = useRouter();
@@ -23,11 +25,7 @@ export default function LiveQueueTicket() {
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         {/* Top Action Sub-bar */}
-        <View style={styles.topSubBar}>
-          <View style={styles.liveConnectedBadge}>
-            <View style={styles.pulseDot} />
-            <Text style={styles.liveConnectedText}>Live · Connected to Queue Ledger</Text>
-          </View>
+        <View style={[styles.topSubBar, { justifyContent: 'flex-end' }]}>
           <View style={styles.subBarActions}>
             <TouchableOpacity style={styles.subBarBtn}>
               <MaterialIcons name="share" size={20} color={theme.colors.primary} />
@@ -181,7 +179,7 @@ export default function LiveQueueTicket() {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={{ height: 40 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );

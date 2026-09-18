@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 
 export default function CustomerDashboard() {
   const router = useRouter();
@@ -11,10 +13,11 @@ export default function CustomerDashboard() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>Buffer</Text>
-          <View style={styles.headerBadge}>
-            <Text style={styles.headerBadgeText}>Universal Queue</Text>
-          </View>
+          <Image 
+            source={require('../../assets/images/Buffer-logo.png')} 
+            style={{ width: 110, height: 55 }} 
+            contentFit="contain" 
+          />
         </View>
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.iconButton}>
@@ -22,7 +25,6 @@ export default function CustomerDashboard() {
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
             <MaterialIcons name="notifications" size={24} color={theme.colors.onSurfaceVariant} />
-            <View style={styles.notificationBadge}><Text style={styles.notificationText}>3</Text></View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.profileButton}>
             <View style={styles.profileAvatar} />
@@ -114,31 +116,6 @@ export default function CustomerDashboard() {
         </View>
         <View style={{height: 100}} />
       </ScrollView>
-      
-      {/* Bottom Nav */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialIcons name="home" size={24} color={theme.colors.primary} />
-          <Text style={[styles.navText, { color: theme.colors.primary }]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialIcons name="confirmation-number" size={24} color={theme.colors.onSurfaceVariant} />
-          <Text style={styles.navText}>Queues</Text>
-        </TouchableOpacity>
-        <View style={styles.navFabContainer}>
-          <TouchableOpacity style={styles.navFab} onPress={() => router.push('/scan-qr' as any)}>
-            <MaterialIcons name="qr-code-scanner" size={24} color={theme.colors.onPrimary} />
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialIcons name="notifications" size={24} color={theme.colors.onSurfaceVariant} />
-          <Text style={styles.navText}>Alerts</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <MaterialIcons name="person" size={24} color={theme.colors.onSurfaceVariant} />
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -200,10 +177,4 @@ const styles = StyleSheet.create({
   metricItem: { flex: 1, alignItems: 'center' },
   metricLabel: { fontSize: 11, color: theme.colors.onSurfaceVariant },
   metricValue: { fontSize: 16, fontWeight: 'bold', color: theme.colors.onSurface },
-  
-  bottomNav: { flexDirection: 'row', position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, backgroundColor: theme.colors.surfaceContainerLowest, borderTopWidth: 1, borderTopColor: theme.colors.outlineVariant, justifyContent: 'space-around', alignItems: 'center', paddingBottom: 20 },
-  navItem: { alignItems: 'center', justifyContent: 'center', flex: 1 },
-  navText: { fontSize: 10, marginTop: 4, color: theme.colors.onSurfaceVariant },
-  navFabContainer: { paddingHorizontal: 8, marginTop: -30 },
-  navFab: { width: 56, height: 56, borderRadius: 28, backgroundColor: theme.colors.primary, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 8 }
 });
