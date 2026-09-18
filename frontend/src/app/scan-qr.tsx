@@ -5,20 +5,27 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   Animated,
   ActivityIndicator,
   Alert,
   Modal,
+  Button,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { TextInput as PaperInput, HelperText } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { theme } from '../theme/theme';
 import { validateQueueCode, QueueVenue, MOCK_VENUES } from '../services/mockQueueData';
 
 export default function ScanQRScreen() {
   const router = useRouter();
+
+  // Camera permissions
+  const [permission, requestPermission] = useCameraPermissions();
 
   // Camera & utility states
   const [isTorchOn, setIsTorchOn] = useState(false);
@@ -32,6 +39,9 @@ export default function ScanQRScreen() {
   // Detected venue state
   const [detectedVenue, setDetectedVenue] = useState<QueueVenue | null>(null);
   const [isHelpVisible, setIsHelpVisible] = useState(false);
+
+  // Prevent multiple rapid scans
+  const scannedRef = useRef(false);
 
   // Animated vertical laser
   const laserAnim = useRef(new Animated.Value(0)).current;
@@ -89,17 +99,18 @@ export default function ScanQRScreen() {
     setDetectedVenue(MOCK_VENUES['BBC-402']);
   };
 
-  // Manual code submit
-  const handleContinueWithCode = async () => {
+  // Reusable validation logic
+  const validateCode = async (code: string) => {
     setErrorMessage(null);
-    if (!queueCode.trim()) {
+    if (!code.trim()) {
       setErrorMessage('Please enter a queue code.');
+      scannedRef.current = false;
       return;
     }
 
     setIsLoading(true);
     try {
-      const result = await validateQueueCode(queueCode);
+      const result = await validateQueueCode(code);
       if (result.success && result.venue) {
         router.push({
           pathname: '/scan-result',
@@ -111,12 +122,28 @@ export default function ScanQRScreen() {
         } as any);
       } else {
         setErrorMessage(result.error || 'Invalid queue code.');
+        // Allow scanning again after a delay if failed
+        setTimeout(() => { scannedRef.current = false; }, 2000);
       }
     } catch {
       setErrorMessage('Verification failed. Try again.');
+      setTimeout(() => { scannedRef.current = false; }, 2000);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Camera scanned callback
+  const handleBarcodeScanned = ({ type, data }: { type: string; data: string }) => {
+    if (scannedRef.current || isLoading) return;
+    scannedRef.current = true;
+    setQueueCode(data);
+    validateCode(data);
+  };
+
+  // Manual code submit
+  const handleContinueWithCode = async () => {
+    validateCode(queueCode);
   };
 
   const handleJoinDetected = () => {
@@ -135,6 +162,25 @@ export default function ScanQRScreen() {
     inputRange: [0, 1],
     outputRange: [16, 224],
   });
+
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet.
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+        <View style={styles.container}>
+          <Text style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurface }}>
+            We need your permission to show the camera
+          </Text>
+          <Button onPress={requestPermission} title="Grant Permission" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
@@ -161,12 +207,16 @@ export default function ScanQRScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
       >
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
         {/* Concise Header */}
         <View style={styles.titleSection}>
           <Text style={styles.title}>Scan to Join</Text>
@@ -174,12 +224,15 @@ export default function ScanQRScreen() {
         </View>
 
         {/* Viewfinder Area */}
-        <TouchableOpacity
-          style={styles.viewfinderWrapper}
-          activeOpacity={0.9}
-          onPress={handleTapViewfinder}
-        >
+        <View style={styles.viewfinderWrapper}>
           <View style={[styles.viewfinder, isTorchOn && styles.viewfinderTorch]}>
+            <CameraView 
+              style={StyleSheet.absoluteFill}
+              facing={lens}
+              enableTorch={isTorchOn}
+              onBarcodeScanned={handleBarcodeScanned}
+              barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+            />
             {/* Corner guides */}
             <View style={[styles.corner, styles.topLeft]} />
             <View style={[styles.corner, styles.topRight]} />
@@ -193,14 +246,8 @@ export default function ScanQRScreen() {
                 { transform: [{ translateY: laserTranslateY }] },
               ]}
             />
-
-            {/* Subtle center QR watermark/target */}
-            <View style={styles.centerTarget}>
-              <MaterialIcons name="qr-code-2" size={88} color="rgba(255, 255, 255, 0.45)" />
-              <Text style={styles.tapToScanHint}>Tap to test scan</Text>
-            </View>
           </View>
-        </TouchableOpacity>
+        </View>
 
         <Text style={styles.alignHint}>Align QR code within frame</Text>
 
@@ -252,43 +299,41 @@ export default function ScanQRScreen() {
 
         {/* Manual Code Input Card */}
         <View style={styles.manualCard}>
-          <Text style={styles.manualTitle}>Have a queue code?</Text>
-          <View
-            style={[
-              styles.inputRow,
-              errorMessage ? { borderColor: theme.colors.error } : null,
-            ]}
-          >
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. BBC-402"
-              placeholderTextColor={theme.colors.outline}
-              value={queueCode}
-              onChangeText={(text) => {
-                setQueueCode(text.toUpperCase());
-                if (errorMessage) setErrorMessage(null);
-              }}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              maxLength={10}
-              editable={!isLoading}
-              onSubmitEditing={handleContinueWithCode}
-            />
-            {queueCode.length > 0 && !isLoading && (
-              <TouchableOpacity
-                onPress={() => {
-                  setQueueCode('');
-                  setErrorMessage(null);
-                }}
-              >
-                <MaterialIcons name="close" size={20} color={theme.colors.onSurfaceVariant} />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {errorMessage && (
-            <Text style={styles.errorText}>{errorMessage}</Text>
-          )}
+          <PaperInput
+            mode="outlined"
+            label="Have a queue code?"
+            placeholder="e.g. BBC-402"
+            value={queueCode}
+            textColor={theme.colors.onSurface}
+            theme={{ colors: { error: '#ff3333' } }}
+            onChangeText={(text) => {
+              setQueueCode(text.toUpperCase());
+              if (errorMessage) setErrorMessage(null);
+            }}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            maxLength={10}
+            disabled={isLoading}
+            error={!!errorMessage}
+            onSubmitEditing={handleContinueWithCode}
+            right={
+              queueCode.length > 0 && !isLoading ? (
+                <PaperInput.Icon
+                  icon="close"
+                  onPress={() => {
+                    setQueueCode('');
+                    setErrorMessage(null);
+                  }}
+                />
+              ) : null
+            }
+            outlineColor={theme.colors.outlineVariant}
+            activeOutlineColor={theme.colors.primary}
+            style={{ backgroundColor: theme.colors.surfaceContainerLowest }}
+          />
+          <HelperText type="error" visible={!!errorMessage} style={{ paddingHorizontal: 0 }}>
+            {errorMessage}
+          </HelperText>
 
           <TouchableOpacity
             style={[styles.continueBtn, isLoading && { opacity: 0.7 }]}
@@ -303,9 +348,10 @@ export default function ScanQRScreen() {
                 <MaterialIcons name="arrow-forward" size={18} color={theme.colors.onPrimary} />
               </>
             )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Clean Help Modal */}
       <Modal
