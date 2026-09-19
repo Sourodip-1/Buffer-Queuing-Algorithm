@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, useWind
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 import { Image } from 'expo-image';
 import { Searchbar, FAB, Portal, Menu } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -54,6 +54,7 @@ const MOCK_QUEUES = [
 
 export default function CustomerDashboard() {
   const router = useRouter();
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [fabOpen, setFabOpen] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'queues' | 'workflows'>('queues');
@@ -405,62 +406,64 @@ export default function CustomerDashboard() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      <Portal>
-        <Animated.View
-          pointerEvents={fabOpen ? 'auto' : 'none'}
-          style={[
-            { position: 'absolute', bottom: 185, right: 16, alignItems: 'flex-end', gap: 16 },
-            {
-              opacity: fabAnimation,
-              transform: [
-                {
-                  translateY: fabAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [30, 0],
-                  })
-                },
-                {
-                  scale: fabAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.8, 1],
-                  })
-                }
-              ]
-            }
-          ]}
-        >
+      {pathname === '/customer-dashboard' && (
+        <Portal>
+          <Animated.View
+            pointerEvents={fabOpen ? 'auto' : 'none'}
+            style={[
+              { position: 'absolute', bottom: 185, right: 16, alignItems: 'flex-end', gap: 16 },
+              {
+                opacity: fabAnimation,
+                transform: [
+                  {
+                    translateY: fabAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [30, 0],
+                    })
+                  },
+                  {
+                    scale: fabAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    })
+                  }
+                ]
+              }
+            ]}
+          >
+            <FAB
+              icon="sitemap"
+              label="Create Workflow"
+              mode="flat"
+              elevation={0}
+              onPress={() => {
+                console.log('Create Workflow');
+                setFabOpen(false);
+              }}
+              color={theme.colors.onSecondaryContainer}
+              style={{ backgroundColor: theme.colors.secondaryContainer, borderRadius: 16, shadowColor: 'transparent', elevation: 0 }}
+            />
+            <FAB
+              icon="human-queue"
+              label="Create Queue"
+              mode="flat"
+              elevation={0}
+              onPress={() => {
+                setFabOpen(false);
+                router.push('/create-queue' as any);
+              }}
+              color={theme.colors.onSecondaryContainer}
+              style={{ backgroundColor: theme.colors.secondaryContainer, borderRadius: 16, shadowColor: 'transparent', elevation: 0 }}
+            />
+          </Animated.View>
           <FAB
-            icon="sitemap"
-            label="Create Workflow"
-            mode="flat"
-            elevation={0}
-            onPress={() => {
-              console.log('Create Workflow');
-              setFabOpen(false);
-            }}
-            color={theme.colors.onSecondaryContainer}
-            style={{ backgroundColor: theme.colors.secondaryContainer, borderRadius: 16, shadowColor: 'transparent', elevation: 0 }}
+            icon={fabOpen ? 'close' : 'plus'}
+            onPress={() => setFabOpen(!fabOpen)}
+            color={theme.colors.onSecondary}
+            style={{ position: 'absolute', bottom: 105, right: 16, backgroundColor: theme.colors.secondary, borderRadius: 28 }}
           />
-          <FAB
-            icon="human-queue"
-            label="Create Queue"
-            mode="flat"
-            elevation={0}
-            onPress={() => {
-              console.log('Create Queue');
-              setFabOpen(false);
-            }}
-            color={theme.colors.onSecondaryContainer}
-            style={{ backgroundColor: theme.colors.secondaryContainer, borderRadius: 16, shadowColor: 'transparent', elevation: 0 }}
-          />
-        </Animated.View>
-        <FAB
-          icon={fabOpen ? 'close' : 'plus'}
-          onPress={() => setFabOpen(!fabOpen)}
-          color={theme.colors.onSecondary}
-          style={{ position: 'absolute', bottom: 105, right: 16, backgroundColor: theme.colors.secondary, borderRadius: 28 }}
-        />
-      </Portal>
+        </Portal>
+      )}
 
       <Modal visible={joinCodeVisible} transparent animationType="fade">
         <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill}>
