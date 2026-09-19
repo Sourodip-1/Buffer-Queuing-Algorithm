@@ -300,7 +300,7 @@ export default function ScanQRScreen() {
             value={queueCode}
             textColor={theme.colors.onSurface}
             theme={{ colors: { error: '#ff3333' } }}
-            onChangeText={(text) => {
+            onChangeText={(text: string) => {
               setQueueCode(text.toUpperCase());
               if (errorMessage) setErrorMessage(null);
             }}
