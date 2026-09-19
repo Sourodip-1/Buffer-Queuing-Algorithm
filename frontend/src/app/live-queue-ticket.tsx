@@ -13,9 +13,7 @@ export default function LiveQueueTicket() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
-            <MaterialIcons name="arrow-back" size={24} color={theme.colors.onSurfaceVariant} />
-          </TouchableOpacity>
+          <View style={styles.iconButton} />
           <Text style={styles.headerTitle}>Active Queue Ticket</Text>
         </View>
         <TouchableOpacity style={styles.profileButton}>

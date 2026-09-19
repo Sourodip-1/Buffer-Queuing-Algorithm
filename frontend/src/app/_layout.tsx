@@ -12,6 +12,7 @@ export default function TabLayout() {
       <Tabs
         tabBar={() => (hideNavBar ? null : <BottomNavBar />)}
         screenOptions={{ headerShown: false }}
+        backBehavior="none"
       >
         <Tabs.Screen name="index" options={{ href: null }} />
         <Tabs.Screen name="customer-dashboard" />

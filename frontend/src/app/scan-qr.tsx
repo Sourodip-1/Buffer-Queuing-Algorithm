@@ -188,13 +188,7 @@ export default function ScanQRScreen() {
 
       {/* Top Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => router.back()}
-          accessibilityLabel="Go back"
-        >
-          <MaterialIcons name="arrow-back" size={24} color={theme.colors.onSurface} />
-        </TouchableOpacity>
+        <View style={styles.headerButton} />
 
         <Text style={styles.headerTitle}>Scan QR</Text>
 
