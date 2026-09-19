@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, useWindowDimensions, FlatList, LayoutAnimation } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, useWindowDimensions, FlatList, LayoutAnimation, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ import { Searchbar, FAB, Portal, Menu } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
-import Reanimated, { FadeInUp, FadeOutUp, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Reanimated, { FadeInUp, FadeOutUp, ZoomIn, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
 const AnimatedTouchableOpacity = Reanimated.createAnimatedComponent(TouchableOpacity);
 
@@ -58,6 +58,8 @@ export default function CustomerDashboard() {
   const [fabOpen, setFabOpen] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'queues' | 'workflows'>('queues');
   const [isSearchFocused, setIsSearchFocused] = React.useState(false);
+  const [joinCodeVisible, setJoinCodeVisible] = React.useState(false);
+  const [joinCode, setJoinCode] = React.useState('');
   const [scanMenuVisible, setScanMenuVisible] = React.useState(false);
 
   const glowAnim = React.useRef(new Animated.Value(0)).current;
@@ -66,9 +68,8 @@ export default function CustomerDashboard() {
 
   const arrowButtonStyle = useAnimatedStyle(() => {
     return {
-      width: withSpring(scanMenuVisible ? 42 : 56, { damping: 24, stiffness: 300 }),
-      borderTopLeftRadius: withSpring(scanMenuVisible ? 100 : 6, { damping: 24, stiffness: 300 }),
-      borderBottomLeftRadius: withSpring(scanMenuVisible ? 100 : 6, { damping: 24, stiffness: 300 }),
+      borderTopLeftRadius: withSpring(scanMenuVisible ? 100 : 6, { damping: 24, stiffness: 300, overshootClamping: true }),
+      borderBottomLeftRadius: withSpring(scanMenuVisible ? 100 : 6, { damping: 24, stiffness: 300, overshootClamping: true }),
     };
   }, [scanMenuVisible]);
 
@@ -189,7 +190,10 @@ export default function CustomerDashboard() {
               placeholder="Search venues, services, or nearby queues..."
               onChangeText={handleSearch}
               value={searchQuery}
-              onFocus={() => setIsSearchFocused(true)}
+              onFocus={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setIsSearchFocused(true);
+              }}
               onBlur={() => setIsSearchFocused(false)}
               style={styles.searchbar}
               inputStyle={styles.searchbarInput}
@@ -218,7 +222,7 @@ export default function CustomerDashboard() {
                 <AnimatedTouchableOpacity 
                   onPress={() => setScanMenuVisible(!scanMenuVisible)}
                   style={[
-                    { height: 42, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.primary, borderTopRightRadius: 100, borderBottomRightRadius: 100 },
+                    { width: 46, height: 42, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.primary, borderTopRightRadius: 100, borderBottomRightRadius: 100 },
                     arrowButtonStyle
                   ]}
                 >
@@ -229,7 +233,7 @@ export default function CustomerDashboard() {
               </View>
               <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.colors.secondaryContainer }]}>
                 <MaterialIcons name="explore" size={20} color={theme.colors.onSecondaryContainer} />
-                <Text style={[styles.actionButtonText, { color: theme.colors.onSecondaryContainer }]}>Explore Services</Text>
+                <Text style={[styles.actionButtonText, { color: theme.colors.onSecondaryContainer }]}>Explore Queues</Text>
               </TouchableOpacity>
             </View>
             {scanMenuVisible && (
@@ -238,7 +242,11 @@ export default function CustomerDashboard() {
                 exiting={FadeOutUp.duration(150)}
               >
                 <TouchableOpacity 
-                  onPress={() => { setScanMenuVisible(false); router.push('/join-code' as any); }}
+                  onPress={() => { 
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setScanMenuVisible(false); 
+                    setJoinCodeVisible(true);
+                  }}
                   style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 16, backgroundColor: theme.colors.primary, borderTopLeftRadius: 100, borderBottomLeftRadius: 100, borderTopRightRadius: 6, borderBottomRightRadius: 6, alignSelf: 'flex-start' }}
                 >
                   <MaterialIcons name="dialpad" size={18} color={theme.colors.onPrimary} />
@@ -453,6 +461,47 @@ export default function CustomerDashboard() {
           style={{ position: 'absolute', bottom: 105, right: 16, backgroundColor: theme.colors.secondary, borderRadius: 28 }}
         />
       </Portal>
+
+      <Modal visible={joinCodeVisible} transparent animationType="fade">
+        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill}>
+          <TouchableOpacity style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)' }} activeOpacity={1} onPress={() => setJoinCodeVisible(false)}>
+            <Reanimated.View entering={FadeInUp.duration(250)} style={{ width: '85%' }}>
+              <TouchableOpacity activeOpacity={1} style={{ width: '100%', backgroundColor: theme.colors.surface, borderRadius: 24, padding: 24, elevation: 4 }}>
+                <Text style={{ fontSize: 20, fontWeight: '700', color: theme.colors.onSurface, marginBottom: 8 }}>Enter Queue Code</Text>
+              <Text style={{ fontSize: 14, color: theme.colors.onSurfaceVariant, marginBottom: 24 }}>Enter the code provided by the venue to join their queue remotely.</Text>
+              
+              <TextInput
+                value={joinCode}
+                onChangeText={setJoinCode}
+                autoCapitalize="characters"
+                maxLength={6}
+                autoFocus={true}
+                style={{ backgroundColor: theme.colors.surfaceContainerLowest, borderWidth: 1, borderColor: theme.colors.outlineVariant, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 18, color: theme.colors.onSurface, letterSpacing: 2, textAlign: 'center', fontWeight: '600', marginBottom: 24 }}
+              />
+              
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 12 }}>
+                <TouchableOpacity onPress={() => setJoinCodeVisible(false)} style={{ paddingHorizontal: 16, paddingVertical: 10 }}>
+                  <Text style={{ color: theme.colors.primary, fontWeight: '600', fontSize: 15 }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    setJoinCodeVisible(false);
+                    setJoinCode('');
+                    router.push('/live-queue-ticket' as any);
+                  }} 
+                  style={{ backgroundColor: theme.colors.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 100, opacity: joinCode.length > 3 ? 1 : 0.5 }}
+                  disabled={joinCode.length <= 3}
+                >
+                  <Text style={{ color: theme.colors.onPrimary, fontWeight: '600', fontSize: 15 }}>Join Queue</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+            </Reanimated.View>
+          </TouchableOpacity>
+        </BlurView>
+      </Modal>
+
     </SafeAreaView>
   );
 }

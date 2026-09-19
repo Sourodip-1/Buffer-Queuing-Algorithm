@@ -10,6 +10,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 
 const C = {
   surfaceContainer: '#ECEEF6', // Classic M3 nav bar background
@@ -106,6 +107,7 @@ export default function BottomNavBar() {
 
   const handlePress = (route: string) => {
     if (pathname === route) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.navigate(route as any);
   };
 
