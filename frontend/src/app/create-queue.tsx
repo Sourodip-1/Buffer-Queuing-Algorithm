@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, KeyboardAvoidingView, Platform, Alert, Image } from 'react-native';
-import { TextInput } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, KeyboardAvoidingView, Platform, Alert, Image, Modal } from 'react-native';
+import { TextInput, Snackbar } from 'react-native-paper';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { TimePickerModal, DatePickerModal, en, registerTranslation } from 'react-native-paper-dates';
+import { TimePickerModal, en, registerTranslation } from 'react-native-paper-dates';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Slider from '@react-native-community/slider';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import * as ImagePicker from 'expo-image-picker';
@@ -16,6 +17,18 @@ registerTranslation('en', en);
 
 export default function CreateQueuePage() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  // Snackbar State
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarAction, setSnackbarAction] = useState<any>(undefined);
+
+  const showSnackbar = (message: string, action?: any) => {
+    setSnackbarMessage(message);
+    setSnackbarAction(action);
+    setSnackbarVisible(true);
+  };
 
   // Basic Info
   const [queueName, setQueueName] = useState('');
@@ -23,36 +36,101 @@ export default function CreateQueuePage() {
   const [coverPhotoUri, setCoverPhotoUri] = useState<string | null>(null);
 
   // Timings & Capacity
-  const [date, setDate] = useState<Date>(new Date());
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('17:00');
+  const getInitialStart = () => {
+    const d = new Date();
+    d.setHours(d.getHours() + 1);
+    return {
+      date: d,
+      time: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+    };
+  };
+
+  const getInitialEnd = () => {
+    const d = new Date();
+    d.setHours(d.getHours() + 3);
+    return {
+      date: d,
+      time: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+    };
+  };
+
+  const initialStart = getInitialStart();
+  const initialEnd = getInitialEnd();
+
+  const [startDate, setStartDate] = useState<Date>(initialStart.date);
+  const [endDate, setEndDate] = useState<Date>(initialEnd.date);
+  const [startTime, setStartTime] = useState(initialStart.time);
+  const [endTime, setEndTime] = useState(initialEnd.time);
   const [hasBreak, setHasBreak] = useState(false);
   const [breakStartTime, setBreakStartTime] = useState('13:00');
   const [breakEndTime, setBreakEndTime] = useState('14:00');
 
   // Date/Time Picker State
   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [activeDateField, setActiveDateField] = useState<'start' | 'end' | null>(null);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [activeTimeField, setActiveTimeField] = useState<'start' | 'end' | 'breakStart' | 'breakEnd' | null>(null);
 
-  const onConfirmDate = React.useCallback(
-    (params: any) => {
-      setDatePickerVisible(false);
-      if (params.date) setDate(params.date);
-    },
-    []
-  );
+  const onConfirmDateAndroid = (event: any, selectedDate: Date) => {
+    setDatePickerVisible(false);
+    if (selectedDate) {
+      if (activeDateField === 'start') setStartDate(selectedDate);
+      if (activeDateField === 'end') setEndDate(selectedDate);
+    }
+  };
+
+  const onConfirmDateIOS = (event: any, selectedDate: Date) => {
+    if (selectedDate) {
+      if (activeDateField === 'start') setStartDate(selectedDate);
+      if (activeDateField === 'end') setEndDate(selectedDate);
+    }
+  };
+  
+  const openDatePicker = (field: 'start' | 'end') => {
+    setActiveDateField(field);
+    setDatePickerVisible(true);
+  };
 
   const onConfirmTime = React.useCallback(
     ({ hours, minutes }: { hours: number; minutes: number }) => {
       setTimePickerVisible(false);
+      
+      const now = new Date();
+      const checkDate = (activeTimeField === 'end' || activeTimeField === 'breakEnd') ? endDate : startDate;
+      
+      const isToday = checkDate.getDate() === now.getDate() && 
+                      checkDate.getMonth() === now.getMonth() && 
+                      checkDate.getFullYear() === now.getFullYear();
+
+      if (isToday && (activeTimeField === 'start' || activeTimeField === 'breakStart')) {
+        if (hours < now.getHours() || (hours === now.getHours() && minutes < now.getMinutes())) {
+          showSnackbar("You cannot select a time in the past.");
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+        }
+      }
+
+      if (activeTimeField === 'end') {
+        const isSameDay = endDate.getDate() === startDate.getDate() && 
+                          endDate.getMonth() === startDate.getMonth() && 
+                          endDate.getFullYear() === startDate.getFullYear();
+        if (isSameDay) {
+          const [startH, startM] = startTime.split(':').map(Number);
+          if (hours < startH || (hours === startH && minutes <= startM)) {
+            showSnackbar("End time must be after the start time.");
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            return;
+          }
+        }
+      }
+
       const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
       if (activeTimeField === 'start') setStartTime(formattedTime);
       if (activeTimeField === 'end') setEndTime(formattedTime);
       if (activeTimeField === 'breakStart') setBreakStartTime(formattedTime);
       if (activeTimeField === 'breakEnd') setBreakEndTime(formattedTime);
     },
-    [activeTimeField]
+    [activeTimeField, startDate, endDate]
   );
 
   const openTimePicker = (field: 'start' | 'end' | 'breakStart' | 'breakEnd') => {
@@ -68,6 +146,7 @@ export default function CreateQueuePage() {
   const [algorithm, setAlgorithm] = useState<'FCFS' | 'BUFFER'>('BUFFER');
   const [bufferTravelTime, setBufferTravelTime] = useState<number>(60); // minutes
   const [segmentWidth, setSegmentWidth] = useState(0);
+  const [isSmartQueuing, setIsSmartQueuing] = useState(true);
 
   // Access & Requirements
   const [isPublic, setIsPublic] = useState(true);
@@ -76,14 +155,14 @@ export default function CreateQueuePage() {
 
   // 1 hr buffer lock
   const isLessThanOneHour = useMemo(() => {
-    const startDateTime = new Date(date);
+    const startDateTime = new Date(startDate);
     const [startH, startM] = startTime.split(':').map(Number);
     startDateTime.setHours(startH, startM, 0, 0);
 
     const oneHourFromNow = new Date();
     oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
     return startDateTime < oneHourFromNow;
-  }, [date, startTime]);
+  }, [startDate, startTime]);
 
   useEffect(() => {
     if (isLessThanOneHour && algorithm === 'BUFFER') {
@@ -139,12 +218,20 @@ export default function CreateQueuePage() {
     if (!autoAssignMaxUsers) return manualMaxUsers;
     const startMins = timeToMinutes(startTime);
     const endMins = timeToMinutes(endTime);
-    let totalMins = endMins - startMins;
+    
+    // Calculate day difference
+    const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime();
+    const endDay = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()).getTime();
+    const dayDiff = Math.round((endDay - startDay) / (1000 * 60 * 60 * 24));
+    
+    let totalMins = (dayDiff * 24 * 60) + endMins - startMins;
     
     if (hasBreak) {
       const bStart = timeToMinutes(breakStartTime);
       const bEnd = timeToMinutes(breakEndTime);
-      totalMins -= Math.max(0, bEnd - bStart);
+      let breakLen = bEnd - bStart;
+      if (breakLen < 0) breakLen += (24 * 60);
+      totalMins -= Math.max(0, breakLen);
     }
     
     const procTime = parseInt(processingTime) || 1;
@@ -152,7 +239,7 @@ export default function CreateQueuePage() {
       return Math.floor(totalMins / procTime).toString();
     }
     return '0';
-  }, [autoAssignMaxUsers, manualMaxUsers, startTime, endTime, hasBreak, breakStartTime, breakEndTime, processingTime]);
+  }, [autoAssignMaxUsers, manualMaxUsers, startTime, endTime, startDate, endDate, hasBreak, breakStartTime, breakEndTime, processingTime]);
 
   const addRequirement = () => {
     if (requirementInput.trim() && !requirements.includes(requirementInput.trim())) {
@@ -202,7 +289,7 @@ export default function CreateQueuePage() {
   const handlePublish = () => {
     // Basic validation
     if (!queueName.trim() || !venue.trim()) {
-      Alert.alert("Missing Fields", "Please provide a name and venue for the queue.");
+      showSnackbar("Please provide a name and venue for the queue.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
@@ -211,12 +298,15 @@ export default function CreateQueuePage() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     
     // Reset Form for next time
+    const iStart = getInitialStart();
+    const iEnd = getInitialEnd();
     setQueueName('');
     setVenue('');
     setCoverPhotoUri(null);
-    setDate(new Date());
-    setStartTime('09:00');
-    setEndTime('17:00');
+    setStartDate(iStart.date);
+    setEndDate(iEnd.date);
+    setStartTime(iStart.time);
+    setEndTime(iEnd.time);
     setHasBreak(false);
     setBreakStartTime('13:00');
     setBreakEndTime('14:00');
@@ -315,22 +405,41 @@ export default function CreateQueuePage() {
           <View style={styles.card}>
             <SectionHeader title="Timing & Capacity" icon="schedule" />
             
-            <View style={styles.inputGroup}>
-              <TouchableOpacity onPress={() => setDatePickerVisible(true)} activeOpacity={0.8}>
-                <View pointerEvents="none">
-                  <TextInput 
-                    mode="outlined"
-                    label="Date"
-                    value={date ? date.toLocaleDateString('en-GB') : ''}
-                    right={<TextInput.Icon icon="calendar-today" />}
-                    editable={false}
-                    outlineColor={theme.colors.outlineVariant}
-                    activeOutlineColor={theme.colors.primary}
-                    textColor={theme.colors.onSurface}
-                    style={styles.paperInput}
-                  />
-                </View>
-              </TouchableOpacity>
+            <View style={styles.row}>
+              <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                <TouchableOpacity onPress={() => openDatePicker('start')} activeOpacity={0.8}>
+                  <View pointerEvents="none">
+                    <TextInput 
+                      mode="outlined"
+                      label="Start Date"
+                      value={startDate ? startDate.toLocaleDateString('en-GB') : ''}
+                      right={<TextInput.Icon icon="calendar-today" />}
+                      editable={false}
+                      outlineColor={theme.colors.outlineVariant}
+                      activeOutlineColor={theme.colors.primary}
+                      textColor={theme.colors.onSurface}
+                      style={styles.paperInput}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                <TouchableOpacity onPress={() => openDatePicker('end')} activeOpacity={0.8}>
+                  <View pointerEvents="none">
+                    <TextInput 
+                      mode="outlined"
+                      label="End Date"
+                      value={endDate ? endDate.toLocaleDateString('en-GB') : ''}
+                      right={<TextInput.Icon icon="calendar-today" />}
+                      editable={false}
+                      outlineColor={theme.colors.outlineVariant}
+                      activeOutlineColor={theme.colors.primary}
+                      textColor={theme.colors.onSurface}
+                      style={styles.paperInput}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.row}>
@@ -460,11 +569,6 @@ export default function CreateQueuePage() {
           <View style={styles.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <SectionHeader title="Algorithm Strategy" icon="calculate" />
-              {isLessThanOneHour && (
-                <View style={{ backgroundColor: theme.colors.tertiaryContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
-                  <Text style={{ fontSize: 10, color: theme.colors.onTertiaryContainer, fontWeight: '700', textTransform: 'uppercase' }}>Smart Queuing</Text>
-                </View>
-              )}
             </View>
             
             <View 
@@ -494,7 +598,7 @@ export default function CreateQueuePage() {
                 onPress={() => { 
                   if (isLessThanOneHour) {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-                    Alert.alert("Buffer Locked", "The Buffer algorithm requires at least 1 hour of lead time before the queue starts.");
+                    showSnackbar("The Buffer algorithm requires at least 1 hour of lead time before the queue starts.");
                   } else {
                     Haptics.selectionAsync(); setAlgorithm('BUFFER'); 
                   }
@@ -507,6 +611,24 @@ export default function CreateQueuePage() {
                 </View>
               </TouchableOpacity>
             </View>
+
+            {isLessThanOneHour && (
+              <Animated.View entering={FadeIn} exiting={FadeOut}>
+                <View style={styles.switchRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.switchLabel}>Smart Queuing</Text>
+                    <Text style={styles.helperText}>Checks travel back time for users in FCFS</Text>
+                  </View>
+                  <Switch 
+                    value={isSmartQueuing} 
+                    onValueChange={(val) => { Haptics.selectionAsync(); setIsSmartQueuing(val); }} 
+                    trackColor={{ false: theme.colors.surfaceContainerHighest, true: theme.colors.tertiary }} 
+                    thumbColor={isSmartQueuing ? theme.colors.onTertiary : theme.colors.outline} 
+                  />
+                </View>
+              </Animated.View>
+            )}
+
             <Text style={styles.helperText}>
               {isLessThanOneHour ? 'Buffer algorithm is locked because the queue starts in less than 1 hour. Only FCFS is available.' : algorithm === 'FCFS' 
                 ? 'First Come First Serve: Users are placed in the queue in the exact order they register.' 
@@ -625,16 +747,50 @@ export default function CreateQueuePage() {
         animationType="fade"
       />
 
-      <DatePickerModal
-        locale="en"
-        mode="single"
-        visible={datePickerVisible}
-        onDismiss={() => setDatePickerVisible(false)}
-        date={date}
-        onConfirm={onConfirmDate}
-        validRange={{ startDate: new Date() }}
-        animationType="slide"
-      />
+      {datePickerVisible && Platform.OS === 'android' && (
+        <DateTimePicker
+          value={activeDateField === 'start' ? startDate : endDate}
+          mode="date"
+          display="default"
+          minimumDate={activeDateField === 'start' ? new Date() : startDate}
+          onValueChange={onConfirmDateAndroid}
+          onDismiss={() => setDatePickerVisible(false)}
+        />
+      )}
+
+      {datePickerVisible && Platform.OS === 'ios' && (
+        <Modal transparent animationType="slide">
+          <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <View style={{ backgroundColor: theme.colors.surface, padding: 16, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 8 }}>
+                <TouchableOpacity onPress={() => setDatePickerVisible(false)}>
+                  <Text style={{ color: theme.colors.primary, fontSize: 16, fontWeight: 'bold' }}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={activeDateField === 'start' ? startDate : endDate}
+                mode="date"
+                display="inline"
+                minimumDate={activeDateField === 'start' ? new Date() : startDate}
+                onValueChange={onConfirmDateIOS}
+                accentColor={theme.colors.primary}
+                textColor={theme.colors.onSurface}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+        action={snackbarAction}
+        wrapperStyle={{ paddingBottom: insets.bottom > 0 ? insets.bottom + 60 : 80 }}
+        style={{ backgroundColor: theme.colors.inverseSurface, borderRadius: 8 }}
+      >
+        <Text style={{ color: theme.colors.inverseOnSurface }}>{snackbarMessage}</Text>
+      </Snackbar>
     </SafeAreaView>
   );
 }
