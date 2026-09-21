@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, KeyboardAvoidingView, Platform, Alert, Image } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../theme/theme';
@@ -9,6 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { TimePickerModal, DatePickerModal, en, registerTranslation } from 'react-native-paper-dates';
 import Slider from '@react-native-community/slider';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeIn, FadeOut, Layout, useAnimatedStyle, useDerivedValue, withSpring } from 'react-native-reanimated';
 
 registerTranslation('en', en);
@@ -19,6 +20,7 @@ export default function CreateQueuePage() {
   // Basic Info
   const [queueName, setQueueName] = useState('');
   const [venue, setVenue] = useState('');
+  const [coverPhotoUri, setCoverPhotoUri] = useState<string | null>(null);
 
   // Timings & Capacity
   const [date, setDate] = useState<Date>(new Date());
@@ -90,7 +92,7 @@ export default function CreateQueuePage() {
   }, [isLessThanOneHour, algorithm]);
 
   const translateX = useDerivedValue(() => {
-    return withSpring(algorithm === 'FCFS' ? 0 : segmentWidth / 2, {
+    return withSpring(algorithm === 'FCFS' ? 0 : (segmentWidth - 8) / 2, {
       damping: 20,
       stiffness: 200,
       mass: 0.5,
@@ -175,6 +177,28 @@ export default function CreateQueuePage() {
     setRequirements(requirements.filter(r => r !== req));
   };
 
+  const pickImage = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setCoverPhotoUri(result.assets[0].uri);
+    }
+  };
+
+  const handleGoBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/customer-dashboard' as any);
+    }
+  };
+
   const handlePublish = () => {
     // Basic validation
     if (!queueName.trim() || !venue.trim()) {
@@ -185,7 +209,27 @@ export default function CreateQueuePage() {
 
     // Success
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.back();
+    
+    // Reset Form for next time
+    setQueueName('');
+    setVenue('');
+    setCoverPhotoUri(null);
+    setDate(new Date());
+    setStartTime('09:00');
+    setEndTime('17:00');
+    setHasBreak(false);
+    setBreakStartTime('13:00');
+    setBreakEndTime('14:00');
+    setProcessingTime('5');
+    setAutoAssignMaxUsers(true);
+    setManualMaxUsers('');
+    setAlgorithm('BUFFER');
+    setBufferTravelTime(60);
+    setIsPublic(true);
+    setRequirementInput('');
+    setRequirements([]);
+
+    handleGoBack();
   };
 
   const SectionHeader = ({ title, icon }: { title: string, icon: string }) => (
@@ -199,7 +243,7 @@ export default function CreateQueuePage() {
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
       {/* Full-screen Dialog Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <MaterialIcons name="close" size={24} color={theme.colors.onSurface} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Queue</Text>
@@ -223,9 +267,20 @@ export default function CreateQueuePage() {
           <View style={styles.card}>
             <SectionHeader title="Basic Info" icon="info-outline" />
             
-            <TouchableOpacity style={styles.imagePlaceholder} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
-              <MaterialIcons name="add-photo-alternate" size={32} color={theme.colors.outline} />
-              <Text style={styles.imagePlaceholderText}>Add Queue Cover Photo</Text>
+            <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage} activeOpacity={0.8}>
+              {coverPhotoUri ? (
+                <View style={{ width: '100%', height: '100%', borderRadius: 12, overflow: 'hidden' }}>
+                  <Image source={{ uri: coverPhotoUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                  <View style={{ position: 'absolute', bottom: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', padding: 6, borderRadius: 20 }}>
+                    <MaterialIcons name="edit" size={16} color="#fff" />
+                  </View>
+                </View>
+              ) : (
+                <>
+                  <MaterialIcons name="add-photo-alternate" size={32} color={theme.colors.outline} />
+                  <Text style={styles.imagePlaceholderText}>Add Queue Cover Photo</Text>
+                </>
+              )}
             </TouchableOpacity>
 
             <View style={styles.inputGroup}>
@@ -424,7 +479,7 @@ export default function CreateQueuePage() {
                   left: 4,
                   width: (segmentWidth - 8) / 2,
                   backgroundColor: theme.colors.primary,
-                  borderRadius: 8,
+                  borderRadius: 100,
                 }, animatedSegmentStyle]} />
               )}
 

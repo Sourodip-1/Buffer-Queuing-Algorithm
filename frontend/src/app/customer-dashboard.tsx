@@ -127,6 +127,13 @@ export default function CustomerDashboard() {
     }).start();
   }, [fabOpen]);
 
+  // Fix for interrupted animations causing faint stamps
+  React.useEffect(() => {
+    if (pathname === '/customer-dashboard' && !fabOpen) {
+      fabAnimation.setValue(0);
+    }
+  }, [pathname, fabOpen]);
+
   const { width } = useWindowDimensions();
   const CARD_WIDTH = width * 0.85;
   const SNAP_INTERVAL = CARD_WIDTH + 16;
@@ -437,8 +444,8 @@ export default function CustomerDashboard() {
               mode="flat"
               elevation={0}
               onPress={() => {
-                console.log('Create Workflow');
                 setFabOpen(false);
+                router.push('/create-workflow' as any);
               }}
               color={theme.colors.onSecondaryContainer}
               style={{ backgroundColor: theme.colors.secondaryContainer, borderRadius: 16, shadowColor: 'transparent', elevation: 0 }}
