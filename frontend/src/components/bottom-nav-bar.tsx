@@ -11,6 +11,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import { useNotifications } from '../context/NotificationContext';
 
 const C = {
   surfaceContainer: '#ECEEF6', // Classic M3 nav bar background
@@ -24,6 +25,7 @@ interface NavItemConfig {
   iconInactive: keyof typeof MaterialIcons.glyphMap;
   label: string;
   route: string;
+  hasBadge?: boolean;
 }
 
 const ITEMS: NavItemConfig[] = [
@@ -86,12 +88,14 @@ function NavItem({
             },
           ]}
         />
-        <MaterialIcons
-          name={isActive ? item.iconActive : item.iconInactive}
-          size={24}
-          color={iconColor}
-          style={{ zIndex: 1 }}
-        />
+        <View style={{ position: 'relative', zIndex: 1 }}>
+          <MaterialIcons
+            name={isActive ? item.iconActive : item.iconInactive}
+            size={24}
+            color={iconColor}
+          />
+          {item.hasBadge && <View style={styles.redDot} />}
+        </View>
       </View>
       <Text style={[styles.label, { color: textColor, fontWeight }]}>
         {item.label}
@@ -104,6 +108,7 @@ export default function BottomNavBar() {
   const router = useRouter();
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { unreadCount } = useNotifications();
 
   const handlePress = (route: string) => {
     if (pathname === route) return;
@@ -116,7 +121,7 @@ export default function BottomNavBar() {
       {ITEMS.map((item) => (
         <NavItem
           key={item.route}
-          item={item}
+          item={{ ...item, hasBadge: item.route === '/alerts' && unreadCount > 0 }}
           isActive={pathname === item.route}
           onPress={() => handlePress(item.route)}
         />
@@ -159,5 +164,16 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
+  },
+  redDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#BA1A1A', // Standard material error red
+    borderWidth: 1.5,
+    borderColor: C.surfaceContainer,
   },
 });

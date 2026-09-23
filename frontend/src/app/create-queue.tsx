@@ -12,6 +12,7 @@ import Slider from '@react-native-community/slider';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeIn, FadeOut, Layout, useAnimatedStyle, useDerivedValue, withSpring } from 'react-native-reanimated';
+import api from '../services/api';
 
 registerTranslation('en', en);
 
@@ -286,7 +287,7 @@ export default function CreateQueuePage() {
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     // Basic validation
     if (!queueName.trim() || !venue.trim()) {
       showSnackbar("Please provide a name and venue for the queue.");
@@ -294,32 +295,75 @@ export default function CreateQueuePage() {
       return;
     }
 
-    // Success
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    
-    // Reset Form for next time
-    const iStart = getInitialStart();
-    const iEnd = getInitialEnd();
-    setQueueName('');
-    setVenue('');
-    setCoverPhotoUri(null);
-    setStartDate(iStart.date);
-    setEndDate(iEnd.date);
-    setStartTime(iStart.time);
-    setEndTime(iEnd.time);
-    setHasBreak(false);
-    setBreakStartTime('13:00');
-    setBreakEndTime('14:00');
-    setProcessingTime('5');
-    setAutoAssignMaxUsers(true);
-    setManualMaxUsers('');
-    setAlgorithm('BUFFER');
-    setBufferTravelTime(60);
-    setIsPublic(true);
-    setRequirementInput('');
-    setRequirements([]);
+    // Construct the payload matching backend schema
+    const startDateTime = new Date(startDate);
+    const [startH, startM] = startTime.split(':').map(Number);
+    startDateTime.setHours(startH, startM, 0, 0);
 
-    handleGoBack();
+    const endDateTime = new Date(endDate);
+    const [endH, endM] = endTime.split(':').map(Number);
+    endDateTime.setHours(endH, endM, 0, 0);
+
+    const safeTravelCutoff = new Date(startDateTime);
+    safeTravelCutoff.setHours(safeTravelCutoff.getHours() - 1);
+    const regCutoff = new Date(endDateTime);
+
+    const payload = {
+      name: queueName,
+      openingTime: startDateTime.toISOString(),
+      closingTime: endDateTime.toISOString(),
+      isStandaloneQueue: true,
+      safeTravelCutoffTime: safeTravelCutoff.toISOString(),
+      registrationCutoffTime: regCutoff.toISOString(),
+      latitude: 0.0,
+      longitude: 0.0,
+      stages: [
+        {
+          name: 'Main Stage',
+          orderIndex: 0,
+          requiredDocs: requirements,
+          counters: [{ name: 'Main Counter' }]
+        }
+      ]
+    };
+
+    try {
+      await api.post('/api/admin/workflows', payload);
+      
+      // Success
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      showSnackbar("Queue successfully created!");
+      
+      // Reset Form for next time
+      const iStart = getInitialStart();
+      const iEnd = getInitialEnd();
+      setQueueName('');
+      setVenue('');
+      setCoverPhotoUri(null);
+      setStartDate(iStart.date);
+      setEndDate(iEnd.date);
+      setStartTime(iStart.time);
+      setEndTime(iEnd.time);
+      setHasBreak(false);
+      setBreakStartTime('13:00');
+      setBreakEndTime('14:00');
+      setProcessingTime('5');
+      setAutoAssignMaxUsers(true);
+      setManualMaxUsers('');
+      setAlgorithm('BUFFER');
+      setBufferTravelTime(60);
+      setIsPublic(true);
+      setRequirementInput('');
+      setRequirements([]);
+
+      setTimeout(() => {
+        handleGoBack();
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to create queue:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      showSnackbar("Failed to publish queue. Please check connection.");
+    }
   };
 
   const SectionHeader = ({ title, icon }: { title: string, icon: string }) => (

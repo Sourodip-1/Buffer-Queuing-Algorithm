@@ -1,15 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Modal, Platform, Switch } from 'react-native';
-import { TextInput } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { TextInput, Snackbar } from 'react-native-paper';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '../theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import * as ImagePicker from 'expo-image-picker';
-import { TimePickerModal, DatePickerModal } from 'react-native-paper-dates';
+import { TimePickerModal } from 'react-native-paper-dates';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Animated, { FadeIn, FadeOut, Layout, SlideInDown, SlideOutDown, useAnimatedStyle, useDerivedValue, withTiming } from 'react-native-reanimated';
+import api from '../services/api';
 
 type WorkflowQueue = {
   id: string;
@@ -24,6 +26,18 @@ type WorkflowStep = {
 
 export default function CreateWorkflowPage() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  // Snackbar State
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarAction, setSnackbarAction] = useState<any>(undefined);
+
+  const showSnackbar = (message: string, action?: any) => {
+    setSnackbarMessage(message);
+    setSnackbarAction(action);
+    setSnackbarVisible(true);
+  };
 
   // Basic Info
   const [workflowName, setWorkflowName] = useState('');
@@ -31,34 +45,103 @@ export default function CreateWorkflowPage() {
   const [coverPhotoUri, setCoverPhotoUri] = useState<string | null>(null);
   const [isWorkflowEnabled, setIsWorkflowEnabled] = useState(true);
 
-  // Master Timings & Algorithm
-  const [date, setDate] = useState<Date>(new Date());
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('17:00');
+  // Master Timing & Capacity
+  const getInitialStart = () => {
+    const d = new Date();
+    d.setHours(d.getHours() + 1);
+    return {
+      date: d,
+      time: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+    };
+  };
+
+  const getInitialEnd = () => {
+    const d = new Date();
+    d.setHours(d.getHours() + 3);
+    return {
+      date: d,
+      time: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+    };
+  };
+
+  const initialStart = getInitialStart();
+  const initialEnd = getInitialEnd();
+
+  const [startDate, setStartDate] = useState<Date>(initialStart.date);
+  const [endDate, setEndDate] = useState<Date>(initialEnd.date);
+  const [startTime, setStartTime] = useState(initialStart.time);
+  const [endTime, setEndTime] = useState(initialEnd.time);
   const [hasBreak, setHasBreak] = useState(false);
   const [breakStartTime, setBreakStartTime] = useState('13:00');
   const [breakEndTime, setBreakEndTime] = useState('14:00');
   const [algorithm, setAlgorithm] = useState<'FCFS' | 'BUFFER'>('BUFFER');
   const [segmentWidth, setSegmentWidth] = useState(0);
+  const [isSmartQueuing, setIsSmartQueuing] = useState(true);
 
   // Date/Time Picker State
   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [activeDateField, setActiveDateField] = useState<'start' | 'end' | null>(null);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [activeTimeField, setActiveTimeField] = useState<'start' | 'end' | 'breakStart' | 'breakEnd' | null>(null);
 
-  const onConfirmDate = React.useCallback((params: any) => {
+  const onConfirmDateAndroid = (event: any, selectedDate: Date) => {
     setDatePickerVisible(false);
-    if (params.date) setDate(params.date);
-  }, []);
+    if (selectedDate) {
+      if (activeDateField === 'start') setStartDate(selectedDate);
+      if (activeDateField === 'end') setEndDate(selectedDate);
+    }
+  };
+
+  const onConfirmDateIOS = (event: any, selectedDate: Date) => {
+    if (selectedDate) {
+      if (activeDateField === 'start') setStartDate(selectedDate);
+      if (activeDateField === 'end') setEndDate(selectedDate);
+    }
+  };
+
+  const openDatePicker = (field: 'start' | 'end') => {
+    setActiveDateField(field);
+    setDatePickerVisible(true);
+  };
 
   const onConfirmTime = React.useCallback(({ hours, minutes }: { hours: number; minutes: number }) => {
     setTimePickerVisible(false);
+
+    const now = new Date();
+    const checkDate = (activeTimeField === 'end' || activeTimeField === 'breakEnd') ? endDate : startDate;
+
+    const isToday = checkDate.getDate() === now.getDate() &&
+      checkDate.getMonth() === now.getMonth() &&
+      checkDate.getFullYear() === now.getFullYear();
+
+    if (isToday && (activeTimeField === 'start' || activeTimeField === 'breakStart')) {
+      if (hours < now.getHours() || (hours === now.getHours() && minutes < now.getMinutes())) {
+        showSnackbar("You cannot select a time in the past.");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+      }
+    }
+
+    if (activeTimeField === 'end') {
+      const isSameDay = endDate.getDate() === startDate.getDate() &&
+        endDate.getMonth() === startDate.getMonth() &&
+        endDate.getFullYear() === startDate.getFullYear();
+      if (isSameDay) {
+        const [startH, startM] = startTime.split(':').map(Number);
+        if (hours < startH || (hours === startH && minutes <= startM)) {
+          showSnackbar("End time must be after the start time.");
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          return;
+        }
+      }
+    }
+
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     if (activeTimeField === 'start') setStartTime(formattedTime);
     if (activeTimeField === 'end') setEndTime(formattedTime);
     if (activeTimeField === 'breakStart') setBreakStartTime(formattedTime);
     if (activeTimeField === 'breakEnd') setBreakEndTime(formattedTime);
-  }, [activeTimeField]);
+  }, [activeTimeField, startDate, endDate]);
 
   const openTimePicker = (field: 'start' | 'end' | 'breakStart' | 'breakEnd') => {
     setActiveTimeField(field);
@@ -76,14 +159,14 @@ export default function CreateWorkflowPage() {
 
   // 1 hr buffer lock
   const isLessThanOneHour = useMemo(() => {
-    const startDateTime = new Date(date);
+    const startDateTime = new Date(startDate);
     const [startH, startM] = startTime.split(':').map(Number);
     startDateTime.setHours(startH, startM, 0, 0);
 
     const oneHourFromNow = new Date();
     oneHourFromNow.setHours(oneHourFromNow.getHours() + 1);
     return startDateTime < oneHourFromNow;
-  }, [date, startTime]);
+  }, [startDate, startTime]);
 
   useEffect(() => {
     if (isLessThanOneHour && algorithm === 'BUFFER') {
@@ -134,22 +217,70 @@ export default function CreateWorkflowPage() {
     }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!workflowName.trim()) {
-      Alert.alert("Missing Fields", "Please provide a name for the workflow.");
+      showSnackbar("Please provide a name for the workflow.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    
-    // Reset Form
-    setWorkflowName('');
-    setDescription('');
-    setCoverPhotoUri(null);
-    setSteps([{ id: 'step-1', queues: [{ id: 'q-1', name: 'Initial Queue', staff: [] }] }]);
+    // Construct the payload matching backend schema
+    const startDateTime = new Date(startDate);
+    const [startH, startM] = startTime.split(':').map(Number);
+    startDateTime.setHours(startH, startM, 0, 0);
 
-    handleGoBack();
+    const endDateTime = new Date(endDate);
+    const [endH, endM] = endTime.split(':').map(Number);
+    endDateTime.setHours(endH, endM, 0, 0);
+
+    // Assuming safeTravelCutoffTime is 1 hour before opening and registration is the same
+    const safeTravelCutoff = new Date(startDateTime);
+    safeTravelCutoff.setHours(safeTravelCutoff.getHours() - 1);
+    const regCutoff = new Date(endDateTime);
+
+    const stages = steps.map((step, idx) => ({
+      name: `Step ${idx + 1}`,
+      orderIndex: idx,
+      counters: step.queues.map(q => ({ name: q.name }))
+    }));
+
+    const payload = {
+      name: workflowName,
+      openingTime: startDateTime.toISOString(),
+      closingTime: endDateTime.toISOString(),
+      isStandaloneQueue: false,
+      safeTravelCutoffTime: safeTravelCutoff.toISOString(),
+      registrationCutoffTime: regCutoff.toISOString(),
+      latitude: 0.0,
+      longitude: 0.0,
+      stages
+    };
+
+    try {
+      const response = await api.post('/api/admin/workflows', payload);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      showSnackbar("Workflow successfully created!");
+
+      // Reset Form for next time
+      const iStart = getInitialStart();
+      const iEnd = getInitialEnd();
+      setWorkflowName('');
+      setDescription('');
+      setCoverPhotoUri(null);
+      setStartDate(iStart.date);
+      setEndDate(iEnd.date);
+      setStartTime(iStart.time);
+      setEndTime(iEnd.time);
+      setSteps([{ id: 'step-1', queues: [{ id: 'q-1', name: 'Initial Queue', staff: [] }] }]);
+
+      setTimeout(() => {
+        handleGoBack();
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to create workflow:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      showSnackbar("Failed to publish workflow. Please check connection.");
+    }
   };
 
   const addNextStep = () => {
@@ -249,8 +380,8 @@ export default function CreateWorkflowPage() {
         </TouchableOpacity>
       </View>
 
-      <KeyboardAwareScrollView 
-        style={styles.scrollView} 
+      <KeyboardAwareScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         enableOnAndroid={true}
         extraScrollHeight={120}
@@ -258,8 +389,21 @@ export default function CreateWorkflowPage() {
       >
         {/* Section 1: Basic Info */}
         <View style={styles.card}>
-          <SectionHeader title="Basic Info" icon="info-outline" />
-          
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <SectionHeader title="Basic Info" icon="info-outline" />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: isWorkflowEnabled ? theme.colors.primary : theme.colors.onSurfaceVariant }}>
+                {isWorkflowEnabled ? 'Enabled' : 'Disabled'}
+              </Text>
+              <Switch
+                value={isWorkflowEnabled}
+                onValueChange={(val) => { Haptics.selectionAsync(); setIsWorkflowEnabled(val); }}
+                trackColor={{ false: theme.colors.surfaceContainerHighest, true: theme.colors.primary }}
+                thumbColor={isWorkflowEnabled ? theme.colors.onPrimary : theme.colors.outline}
+              />
+            </View>
+          </View>
+
           <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage} activeOpacity={0.8}>
             {coverPhotoUri ? (
               <View style={{ width: '100%', height: '100%', borderRadius: 12, overflow: 'hidden' }}>
@@ -277,7 +421,7 @@ export default function CreateWorkflowPage() {
           </TouchableOpacity>
 
           <View style={styles.inputGroup}>
-            <TextInput 
+            <TextInput
               mode="outlined"
               label="Workflow Name"
               placeholder="e.g. Complete Repair Journey"
@@ -290,7 +434,7 @@ export default function CreateWorkflowPage() {
             />
           </View>
           <View style={styles.inputGroup}>
-            <TextInput 
+            <TextInput
               mode="outlined"
               label="Description (Optional)"
               placeholder="What is this workflow for?"
@@ -306,7 +450,200 @@ export default function CreateWorkflowPage() {
           </View>
         </View>
 
-        {/* Section 2: Flow Builder */}
+        {/* Section 2: Timing & Capacity */}
+        <View style={styles.card}>
+          <SectionHeader title="Timing & Capacity" icon="schedule" />
+
+          <View style={styles.row}>
+            <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+              <TouchableOpacity onPress={() => openDatePicker('start')} activeOpacity={0.8}>
+                <View pointerEvents="none">
+                  <TextInput
+                    mode="outlined"
+                    label="Start Date"
+                    value={startDate ? startDate.toLocaleDateString('en-GB') : ''}
+                    right={<TextInput.Icon icon="calendar-today" />}
+                    editable={false}
+                    outlineColor={theme.colors.outlineVariant}
+                    activeOutlineColor={theme.colors.primary}
+                    textColor={theme.colors.onSurface}
+                    style={styles.paperInput}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+              <TouchableOpacity onPress={() => openDatePicker('end')} activeOpacity={0.8}>
+                <View pointerEvents="none">
+                  <TextInput
+                    mode="outlined"
+                    label="End Date"
+                    value={endDate ? endDate.toLocaleDateString('en-GB') : ''}
+                    right={<TextInput.Icon icon="calendar-today" />}
+                    editable={false}
+                    outlineColor={theme.colors.outlineVariant}
+                    activeOutlineColor={theme.colors.primary}
+                    textColor={theme.colors.onSurface}
+                    style={styles.paperInput}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+              <TouchableOpacity onPress={() => openTimePicker('start')} activeOpacity={0.8}>
+                <View pointerEvents="none">
+                  <TextInput
+                    mode="outlined"
+                    label="Start Time"
+                    value={format12Hour(startTime)}
+                    right={<TextInput.Icon icon="clock-outline" />}
+                    editable={false}
+                    outlineColor={theme.colors.outlineVariant}
+                    activeOutlineColor={theme.colors.primary}
+                    textColor={theme.colors.onSurface}
+                    style={styles.paperInput}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+              <TouchableOpacity onPress={() => openTimePicker('end')} activeOpacity={0.8}>
+                <View pointerEvents="none">
+                  <TextInput
+                    mode="outlined"
+                    label="End Time"
+                    value={format12Hour(endTime)}
+                    right={<TextInput.Icon icon="clock-outline" />}
+                    editable={false}
+                    outlineColor={theme.colors.outlineVariant}
+                    activeOutlineColor={theme.colors.primary}
+                    textColor={theme.colors.onSurface}
+                    style={styles.paperInput}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.switchRow}>
+            <Text style={styles.switchLabel}>Include Break (e.g. Lunch)</Text>
+            <Switch value={hasBreak} onValueChange={(val) => { Haptics.selectionAsync(); setHasBreak(val); }} trackColor={{ false: theme.colors.surfaceContainerHighest, true: theme.colors.primary }} thumbColor={hasBreak ? theme.colors.onPrimary : theme.colors.outline} />
+          </View>
+
+          {hasBreak && (
+            <Animated.View entering={FadeIn} exiting={FadeOut} layout={Layout.duration(250)} style={styles.row}>
+              <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                <TouchableOpacity onPress={() => openTimePicker('breakStart')} activeOpacity={0.8}>
+                  <View pointerEvents="none">
+                    <TextInput
+                      mode="outlined"
+                      label="Break Start"
+                      value={format12Hour(breakStartTime)}
+                      right={<TextInput.Icon icon="clock-outline" />}
+                      editable={false}
+                      outlineColor={theme.colors.outlineVariant}
+                      activeOutlineColor={theme.colors.primary}
+                      textColor={theme.colors.onSurface}
+                      style={styles.paperInput}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                <TouchableOpacity onPress={() => openTimePicker('breakEnd')} activeOpacity={0.8}>
+                  <View pointerEvents="none">
+                    <TextInput
+                      mode="outlined"
+                      label="Break End"
+                      value={format12Hour(breakEndTime)}
+                      right={<TextInput.Icon icon="clock-outline" />}
+                      editable={false}
+                      outlineColor={theme.colors.outlineVariant}
+                      activeOutlineColor={theme.colors.primary}
+                      textColor={theme.colors.onSurface}
+                      style={styles.paperInput}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          )}
+        </View>
+
+
+        {/* Section 3: Algorithm */}
+        <View style={styles.card}>
+          <SectionHeader title="Algorithm Strategy" icon="calculate" />
+
+          <View
+            style={[styles.segmentedControl, { position: 'relative', overflow: 'hidden' }, isLessThanOneHour && { opacity: 0.7 }]}
+            onLayout={(e) => setSegmentWidth(e.nativeEvent.layout.width)}
+          >
+            {segmentWidth > 0 && (
+              <Animated.View style={[{
+                position: 'absolute',
+                top: 4,
+                bottom: 4,
+                left: 4,
+                width: (segmentWidth - 8) / 2,
+                backgroundColor: theme.colors.primary,
+                borderRadius: 100,
+              }, animatedSegmentStyle]} />
+            )}
+
+            <TouchableOpacity
+              style={[styles.segment, { backgroundColor: 'transparent' }]}
+              onPress={() => { Haptics.selectionAsync(); setAlgorithm('FCFS'); }}
+            >
+              <Text style={[styles.segmentText, algorithm === 'FCFS' ? styles.segmentTextActive : { color: theme.colors.onSurfaceVariant }]}>FCFS</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.segment, { backgroundColor: 'transparent' }]}
+              onPress={() => {
+                if (isLessThanOneHour) {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+                  showSnackbar("The Buffer algorithm requires at least 1 hour of lead time before the workflow starts.");
+                } else {
+                  Haptics.selectionAsync(); setAlgorithm('BUFFER');
+                }
+              }}
+              activeOpacity={isLessThanOneHour ? 1 : 0.2}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Text style={[styles.segmentText, algorithm === 'BUFFER' ? styles.segmentTextActive : { color: theme.colors.onSurfaceVariant }]}>BUFFER</Text>
+                {isLessThanOneHour && <MaterialIcons name="lock" size={14} color={theme.colors.onSurfaceVariant} />}
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {isLessThanOneHour && (
+            <Animated.View entering={FadeIn} exiting={FadeOut}>
+              <View style={styles.switchRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.switchLabel}>Smart Queuing</Text>
+                  <Text style={styles.helperText}>Checks travel back time for users in FCFS</Text>
+                </View>
+                <Switch
+                  value={isSmartQueuing}
+                  onValueChange={(val) => { Haptics.selectionAsync(); setIsSmartQueuing(val); }}
+                  trackColor={{ false: theme.colors.surfaceContainerHighest, true: theme.colors.tertiary }}
+                  thumbColor={isSmartQueuing ? theme.colors.onTertiary : theme.colors.outline}
+                />
+              </View>
+            </Animated.View>
+          )}
+
+          <Text style={styles.helperText}>
+            {isLessThanOneHour ? 'Buffer algorithm is locked because the workflow starts in less than 1 hour. Only FCFS is available.' : algorithm === 'FCFS'
+              ? 'First Come First Serve: Users are placed in the queues in the exact order they register.'
+              : 'Buffer Strategy: Collects registrations into a pool and dynamically optimizes the throughput sequence.'}
+          </Text>
+        </View>
+
+        {/* Section 4: Flow Builder */}
         <View style={styles.card}>
           <SectionHeader title="Workflow Steps" icon="account-tree" />
           <Text style={styles.helperText}>
@@ -316,7 +653,7 @@ export default function CreateWorkflowPage() {
           <View style={styles.timelineContainer}>
             {steps.map((step, stepIndex) => (
               <Animated.View key={step.id} entering={FadeIn} layout={Layout.duration(200)}>
-                
+
                 {/* Step Connector Line (unless it's the very first node) */}
                 {stepIndex > 0 && (
                   <View style={styles.timelineConnector}>
@@ -336,13 +673,13 @@ export default function CreateWorkflowPage() {
                   <View style={styles.queuesRow}>
                     {step.queues.map((queue) => (
                       <Animated.View key={queue.id} layout={Layout.duration(200)} style={styles.queueNodeWrapper}>
-                        <TouchableOpacity 
-                          style={styles.queueNode} 
+                        <TouchableOpacity
+                          style={styles.queueNode}
                           onPress={() => openQueueEditor(step.id, queue)}
                           activeOpacity={0.7}
                         >
-                          <TouchableOpacity 
-                            style={styles.removeQueueButton} 
+                          <TouchableOpacity
+                            style={styles.removeQueueButton}
                             onPress={() => removeQueue(step.id, queue.id)}
                           >
                             <MaterialIcons name="close" size={14} color="#fff" />
@@ -356,7 +693,7 @@ export default function CreateWorkflowPage() {
                         </TouchableOpacity>
                       </Animated.View>
                     ))}
-                    
+
                     {/* Add Parallel Queue Button */}
                     <TouchableOpacity style={styles.addParallelButton} onPress={() => addParallelQueue(step.id)}>
                       <MaterialIcons name="add" size={24} color={theme.colors.primary} />
@@ -381,7 +718,7 @@ export default function CreateWorkflowPage() {
       <Modal visible={!!editingQueue} transparent animationType="none">
         <View style={styles.modalOverlay}>
           <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={saveQueueEditor} />
-          
+
           <Animated.View entering={SlideInDown.duration(250)} exiting={SlideOutDown} style={styles.bottomSheet}>
             <View style={styles.bottomSheetHeader}>
               <Text style={styles.bottomSheetTitle}>Edit Queue Step</Text>
@@ -391,7 +728,7 @@ export default function CreateWorkflowPage() {
             </View>
 
             <View style={styles.inputGroup}>
-              <TextInput 
+              <TextInput
                 mode="outlined"
                 label="Queue Name"
                 value={tempQueueName}
@@ -404,7 +741,7 @@ export default function CreateWorkflowPage() {
             </View>
 
             <View style={styles.inputGroup}>
-              <TextInput 
+              <TextInput
                 mode="outlined"
                 label="Assign Staff"
                 placeholder="Enter names separated by comma"
@@ -435,6 +772,59 @@ export default function CreateWorkflowPage() {
           </Animated.View>
         </View>
       </Modal>
+
+      {datePickerVisible && Platform.OS === 'android' && (
+        <DateTimePicker
+          value={activeDateField === 'start' ? startDate : endDate}
+          mode="date"
+          display="default"
+          minimumDate={activeDateField === 'start' ? new Date() : startDate}
+          onValueChange={onConfirmDateAndroid}
+          onDismiss={() => setDatePickerVisible(false)}
+        />
+      )}
+
+      {datePickerVisible && Platform.OS === 'ios' && (
+        <Modal transparent animationType="slide">
+          <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <View style={{ backgroundColor: theme.colors.surface, padding: 16, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 8 }}>
+                <TouchableOpacity onPress={() => setDatePickerVisible(false)}>
+                  <Text style={{ color: theme.colors.primary, fontSize: 16, fontWeight: 'bold' }}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <DateTimePicker
+                value={activeDateField === 'start' ? startDate : endDate}
+                mode="date"
+                display="inline"
+                minimumDate={activeDateField === 'start' ? new Date() : startDate}
+                onValueChange={onConfirmDateIOS}
+                accentColor={theme.colors.primary}
+                textColor={theme.colors.onSurface}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      <TimePickerModal
+        visible={timePickerVisible}
+        onDismiss={() => setTimePickerVisible(false)}
+        onConfirm={onConfirmTime}
+        hours={12}
+        minutes={0}
+      />
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+        action={snackbarAction}
+        wrapperStyle={{ paddingBottom: insets.bottom > 0 ? insets.bottom + 60 : 80 }}
+        style={{ backgroundColor: theme.colors.inverseSurface, borderRadius: 8 }}
+      >
+        <Text style={{ color: theme.colors.inverseOnSurface }}>{snackbarMessage}</Text>
+      </Snackbar>
 
     </SafeAreaView>
   );
@@ -490,7 +880,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
     elevation: 2,
-    shadowColor: theme.colors.shadow,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -529,6 +919,46 @@ const styles = StyleSheet.create({
   paperInput: {
     backgroundColor: theme.colors.surfaceContainerLowest,
     fontSize: 16,
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  switchLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.onSurface,
+  },
+  segmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.surfaceContainerHighest,
+    borderRadius: 100,
+    padding: 4,
+    marginBottom: 12,
+  },
+  segment: {
+    flex: 1,
+    paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 100,
+  },
+  segmentActive: {
+    backgroundColor: theme.colors.primary,
+  },
+  segmentText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.onSurfaceVariant,
+  },
+  segmentTextActive: {
+    color: theme.colors.onPrimary,
   },
   helperText: {
     fontSize: 13,

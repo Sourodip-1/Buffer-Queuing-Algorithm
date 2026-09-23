@@ -6,45 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Swipeable } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 
-interface Alert {
-  id: string;
-  title: string;
-  subtitle: string;
-  time: string;
-  isRead: boolean;
-  type: 'queue';
-  details?: string;
-}
-
-const MOCK_ALERTS: Alert[] = [
-  { 
-    id: '1', 
-    title: "It's almost your turn!", 
-    subtitle: 'You are next at Blue Bean Cafe.', 
-    time: 'Just now', 
-    isRead: false, 
-    type: 'queue',
-    details: 'Please head towards the pickup counter. Your order #492 is being prepared and will be ready in approximately 2 minutes.'
-  },
-  { 
-    id: '2', 
-    title: 'Queue Update', 
-    subtitle: 'Wait time increased by 5 mins at DMV.', 
-    time: '10m ago', 
-    isRead: true, 
-    type: 'queue',
-    details: 'Due to higher than expected volume, the wait time has been adjusted. Your current estimated wait time is 45 minutes.'
-  },
-  { 
-    id: '3', 
-    title: 'Ticket Expiring Soon', 
-    subtitle: 'Your ticket for Tech Conference will expire in 10 minutes.', 
-    time: '2h ago', 
-    isRead: false, 
-    type: 'queue',
-    details: 'If you are not present when your number is called, your ticket will be forfeited.'
-  },
-];
+import { useNotifications, Alert } from '../context/NotificationContext';
 
 const getIconForType = (type: string) => {
   return 'confirmation-number';
@@ -55,6 +17,7 @@ const getIconColorForType = (type: string) => {
 };
 
 function AlertItem({ item, index, totalLength, onDelete }: { item: Alert; index: number; totalLength: number; onDelete: () => void }) {
+  const { markAsRead } = useNotifications();
   const [expanded, setExpanded] = React.useState(false);
   const isFirst = index === 0;
   const isLast = index === totalLength - 1;
@@ -105,6 +68,9 @@ function AlertItem({ item, index, totalLength, onDelete }: { item: Alert; index:
         onPress={() => {
           Haptics.selectionAsync();
           setExpanded(!expanded);
+          if (!item.isRead) {
+            markAsRead(item.id);
+          }
         }}
         style={[
           styles.card,
@@ -152,17 +118,13 @@ function AlertItem({ item, index, totalLength, onDelete }: { item: Alert; index:
 }
 
 export default function AlertsPage() {
-  const [alerts, setAlerts] = React.useState(MOCK_ALERTS);
-
-  const handleDelete = (id: string) => {
-    setAlerts(prev => prev.filter(alert => alert.id !== id));
-  };
+  const { alerts, deleteAlert, markAllAsRead, markAsRead } = useNotifications();
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Alerts</Text>
-        <TouchableOpacity onPress={() => setAlerts(alerts.map(a => ({ ...a, isRead: true })))}>
+        <TouchableOpacity onPress={markAllAsRead}>
           <MaterialIcons name="done-all" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
@@ -176,7 +138,7 @@ export default function AlertsPage() {
             item={item} 
             index={index} 
             totalLength={alerts.length} 
-            onDelete={() => handleDelete(item.id)} 
+            onDelete={() => deleteAlert(item.id)} 
           />
         )}
         ListEmptyComponent={

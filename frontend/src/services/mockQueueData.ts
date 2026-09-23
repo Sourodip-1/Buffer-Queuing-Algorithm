@@ -18,6 +18,8 @@ export interface QueueVenue {
   unavailableReason?: string;
 }
 
+import api from './api';
+
 export interface UserProfile {
   name: string;
   phone: string;
@@ -421,23 +423,34 @@ export async function getUniversalQueueDetails(
 export async function joinUniversalQueue(
   queue: UniversalQueue
 ): Promise<JoinedQueueTicket> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  const now = new Date();
-  const serviceTime = new Date(now.getTime() + queue.estimatedWaitMinutes * 60000);
-  const timeStr = serviceTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  return {
-    token: 'REG-042',
-    venueName: queue.organizationName,
-    venueBranch: queue.departmentName,
-    service: queue.serviceName,
-    partySize: 'Individual',
-    seating: 'Registration Desk',
-    estimatedServiceTime: timeStr,
-    estimatedWaitMinutes: queue.estimatedWaitMinutes,
-    peopleAhead: Math.round(queue.filledCapacity * 0.4) || 6,
-    callingNowToken: 'REG-036',
+  const payload = {
+    workflowId: queue.id,
+    phoneNumber: '+1 (555) 019-2834', // Mock phone number since frontend doesn't collect it yet
+    age: 22,
+    travelTimeMins: 15,
+    requestTravelFactor: true
   };
+
+  try {
+    const response = await api.post('/api/register', payload);
+    const data = response.data;
+    const ticket = data.ticket;
+
+    return {
+      token: ticket.qrToken ? ticket.qrToken.substring(0, 6).toUpperCase() : 'B-042',
+      venueName: queue.organizationName,
+      venueBranch: queue.departmentName,
+      service: queue.serviceName,
+      partySize: 'Individual',
+      seating: 'Registration Desk',
+      estimatedServiceTime: new Date(Date.now() + queue.estimatedWaitMinutes * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      estimatedWaitMinutes: queue.estimatedWaitMinutes,
+      peopleAhead: Math.round(queue.filledCapacity * 0.4) || 6, // Go Engine will calculate this properly later
+      callingNowToken: 'REG-036',
+    };
+  } catch (error) {
+    console.error('Failed to join queue:', error);
+    throw error;
+  }
 }
 
