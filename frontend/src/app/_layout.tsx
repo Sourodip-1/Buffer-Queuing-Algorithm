@@ -7,7 +7,7 @@ import { NotificationProvider } from '../context/NotificationContext';
 
 export default function TabLayout() {
   const pathname = usePathname();
-  const hideNavBar = pathname === '/' || pathname === '/index';
+  const hideNavBar = pathname === '/' || pathname === '/index' || pathname === '/login';
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
