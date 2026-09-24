@@ -127,10 +127,10 @@ export default function CustomerDashboard() {
     }).start();
   }, [fabOpen]);
 
-  // Fix for interrupted animations causing faint stamps
+  // Removed aggressive setValue(0) so the closing animation can complete naturally.
   React.useEffect(() => {
     if (pathname === '/customer-dashboard' && !fabOpen) {
-      fabAnimation.setValue(0);
+      // Allow animation to run
     }
   }, [pathname, fabOpen]);
 
@@ -223,18 +223,20 @@ export default function CustomerDashboard() {
           <View style={{ gap: 4 }}>
             <View style={styles.actionGrid}>
               <View style={{ flex: 1, flexDirection: 'row', gap: 4 }}>
-                <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, backgroundColor: theme.colors.primary, borderTopLeftRadius: 100, borderBottomLeftRadius: 100, borderTopRightRadius: 6, borderBottomRightRadius: 6 }} onPress={() => router.push('/scan-qr' as any)}>
-                  <MaterialIcons name="qr-code-scanner" size={20} color={theme.colors.onPrimary} />
-                  <Text style={[styles.actionButtonText, { color: theme.colors.onPrimary }]}>Scan QR</Text>
+                <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderTopLeftRadius: 100, borderBottomLeftRadius: 100, borderTopRightRadius: 6, borderBottomRightRadius: 6, overflow: 'hidden' }} onPress={() => router.push('/scan-qr' as any)}>
+                  <LinearGradient colors={['#3B82F6', '#2563EB']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+                  <MaterialIcons name="qr-code-scanner" size={20} color={theme.colors.onPrimary} style={{ zIndex: 1 }} />
+                  <Text style={[styles.actionButtonText, { color: theme.colors.onPrimary, zIndex: 1, marginLeft: 8 }]}>Scan QR</Text>
                 </TouchableOpacity>
                 <AnimatedTouchableOpacity 
                   onPress={() => setScanMenuVisible(!scanMenuVisible)}
                   style={[
-                    { width: 46, height: 42, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.primary, borderTopRightRadius: 100, borderBottomRightRadius: 100 },
+                    { width: 46, height: 42, justifyContent: 'center', alignItems: 'center', borderTopRightRadius: 100, borderBottomRightRadius: 100, overflow: 'hidden' },
                     arrowButtonStyle
                   ]}
                 >
-                  <Animated.View style={{ transform: [{ rotate: chevronSpin }] }}>
+                  <LinearGradient colors={['#2563EB', '#1D4ED8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+                  <Animated.View style={{ transform: [{ rotate: chevronSpin }], zIndex: 1 }}>
                     <MaterialIcons name="keyboard-arrow-down" size={20} color={theme.colors.onPrimary} />
                   </Animated.View>
                 </AnimatedTouchableOpacity>
@@ -312,16 +314,21 @@ export default function CustomerDashboard() {
                     <Text style={styles.waitingText}>{item.status}</Text>
                   </View>
                 </View>
-                <View style={styles.ticketStrip}>
-                  <View>
-                    <Text style={styles.ticketLabel}>Your Ticket</Text>
-                    <Text style={styles.ticketCode}>{item.ticket}</Text>
+                <LinearGradient 
+                  colors={[theme.colors.primaryFixed, '#bfdbfe']}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+                  style={[styles.ticketStrip, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.ticketLabel, { textTransform: 'uppercase', fontSize: 10, letterSpacing: 0.5 }]}>YOUR TICKET</Text>
+                    <Text style={[styles.ticketCode, { fontSize: 32 }]}>{item.ticket}</Text>
                   </View>
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={styles.ticketLabel}>Est. Call Time</Text>
-                    <Text style={styles.ticketTime}>{item.estTime}</Text>
+                  <View style={{ width: 1, height: '80%', backgroundColor: '#93c5fd', marginHorizontal: 16 }} />
+                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                    <Text style={[styles.ticketLabel, { textTransform: 'uppercase', fontSize: 10, letterSpacing: 0.5 }]}>EST. CALL TIME</Text>
+                    <Text style={[styles.ticketTime, { fontSize: 22, fontWeight: '700' }]}>{item.estTime}</Text>
                   </View>
-                </View>
+                </LinearGradient>
                 <View style={styles.metricsGrid}>
                   <View style={styles.metricItem}>
                     <Text style={styles.metricLabel}>Now Serving</Text>
@@ -463,12 +470,16 @@ export default function CustomerDashboard() {
               style={{ backgroundColor: theme.colors.secondaryContainer, borderRadius: 16, shadowColor: 'transparent', elevation: 0 }}
             />
           </Animated.View>
-          <FAB
-            icon={fabOpen ? 'close' : 'plus'}
+          <TouchableOpacity
             onPress={() => setFabOpen(!fabOpen)}
-            color={theme.colors.onSecondary}
-            style={{ position: 'absolute', bottom: 105, right: 16, backgroundColor: theme.colors.secondary, borderRadius: 28 }}
-          />
+            activeOpacity={0.8}
+            style={{ position: 'absolute', bottom: 105, right: 16, width: 56, height: 56, borderRadius: 28, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', elevation: 0, shadowColor: 'transparent', borderWidth: 0 }}
+          >
+            <LinearGradient colors={['#4A90E2', '#1E5BB8']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+            <Animated.View style={{ transform: [{ rotate: fabAnimation.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '135deg'] }) }], zIndex: 1 }}>
+              <MaterialIcons name="add" size={28} color="#ffffff" />
+            </Animated.View>
+          </TouchableOpacity>
         </Portal>
       )}
 
@@ -520,12 +531,14 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: theme.colors.surface },
   searchbar: {
     backgroundColor: theme.colors.surfaceContainerLowest,
-    borderRadius: 100, // fully rounded pill
-    shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 3, // Android shadow
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.03,
+    shadowRadius: 16,
+    elevation: 2,
     height: 56,
   },
   searchbarInput: { fontSize: 14, color: theme.colors.onSurface },
@@ -543,7 +556,7 @@ const styles = StyleSheet.create({
   statusAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: theme.colors.surfaceContainerHigh, justifyContent: 'center', alignItems: 'center' },
 
   actionGrid: { flexDirection: 'row', gap: 16, marginTop: 24 },
-  actionButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 100 },
+  actionButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 100, borderWidth: 1, borderColor: 'rgba(0,0,0,0.02)', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.03, shadowRadius: 12, elevation: 1 },
   actionButtonText: { fontSize: 14, fontWeight: '600', marginLeft: 8 },
 
   section: { marginTop: 40 },
@@ -554,7 +567,7 @@ const styles = StyleSheet.create({
   liveSyncDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: theme.colors.primary },
   liveSyncText: { fontSize: 11, fontWeight: '600', color: theme.colors.primary },
 
-  activeCard: { backgroundColor: theme.colors.surfaceContainerLow, borderRadius: 16, overflow: 'hidden', padding: 16 },
+  activeCard: { backgroundColor: theme.colors.surfaceContainerLowest, borderRadius: 16, overflow: 'hidden', padding: 16, borderWidth: 1, borderColor: 'rgba(0,0,0,0.03)', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.03, shadowRadius: 20, elevation: 2 },
   activeCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   activeCardHeaderLeft: { flexDirection: 'row', gap: 12, flex: 1, paddingRight: 8 },
   venueIcon: { width: 48, height: 48, borderRadius: 12, backgroundColor: theme.colors.surfaceContainerHigh, justifyContent: 'center', alignItems: 'center' },
@@ -584,7 +597,7 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 14, fontWeight: '500', color: theme.colors.onSurfaceVariant },
   activeTabText: { color: theme.colors.primary, fontWeight: 'bold' },
   tabContent: { marginTop: 16, minHeight: 80, justifyContent: 'center' },
-  emptyState: { alignItems: 'center', paddingVertical: 16, backgroundColor: theme.colors.surfaceContainerLow, borderRadius: 16 },
+  emptyState: { alignItems: 'center', paddingVertical: 16, backgroundColor: theme.colors.surfaceContainerLowest, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(0,0,0,0.03)', shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.03, shadowRadius: 16, elevation: 1 },
   emptyStateTitle: { fontSize: 16, fontWeight: 'bold', color: theme.colors.onSurface, marginTop: 12 },
   emptyStateDesc: { fontSize: 14, color: theme.colors.onSurfaceVariant, textAlign: 'center', marginTop: 4 },
 });

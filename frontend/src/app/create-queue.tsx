@@ -13,6 +13,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import * as ImagePicker from 'expo-image-picker';
 import Animated, { FadeIn, FadeOut, Layout, useAnimatedStyle, useDerivedValue, withSpring } from 'react-native-reanimated';
 import api from '../services/api';
+import LocationPicker from '../components/LocationPicker';
+
+
 
 registerTranslation('en', en);
 
@@ -401,21 +404,28 @@ export default function CreateQueuePage() {
           <View style={styles.card}>
             <SectionHeader title="Basic Info" icon="info-outline" />
             
-            <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage} activeOpacity={0.8}>
-              {coverPhotoUri ? (
-                <View style={{ width: '100%', height: '100%', borderRadius: 12, overflow: 'hidden' }}>
-                  <Image source={{ uri: coverPhotoUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                  <View style={{ position: 'absolute', bottom: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', padding: 6, borderRadius: 20 }}>
-                    <MaterialIcons name="edit" size={16} color="#fff" />
-                  </View>
-                </View>
-              ) : (
-                <>
-                  <MaterialIcons name="add-photo-alternate" size={32} color={theme.colors.outline} />
-                  <Text style={styles.imagePlaceholderText}>Add Queue Cover Photo</Text>
-                </>
-              )}
-            </TouchableOpacity>
+            {coverPhotoUri ? (
+              <View style={[styles.imagePlaceholder, { borderWidth: 0 }]}>
+                <Image source={{ uri: coverPhotoUri }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+                <TouchableOpacity 
+                  style={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', padding: 6, borderRadius: 20 }}
+                  onPress={() => setCoverPhotoUri(null)}
+                >
+                  <MaterialIcons name="close" size={16} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={{ position: 'absolute', bottom: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', padding: 6, borderRadius: 20 }}
+                  onPress={pickImage}
+                >
+                  <MaterialIcons name="edit" size={16} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage} activeOpacity={0.8}>
+                <MaterialIcons name="add-photo-alternate" size={32} color={theme.colors.outline} />
+                <Text style={styles.imagePlaceholderText}>Add Queue Cover Photo</Text>
+              </TouchableOpacity>
+            )}
 
             <View style={styles.inputGroup}>
               <TextInput 
@@ -430,19 +440,7 @@ export default function CreateQueuePage() {
                 style={styles.paperInput}
               />
             </View>
-            <View style={styles.inputGroup}>
-              <TextInput 
-                mode="outlined"
-                label="Venue"
-                placeholder="e.g. Blue Bean Main Campus"
-                value={venue}
-                onChangeText={setVenue}
-                outlineColor={theme.colors.outlineVariant}
-                activeOutlineColor={theme.colors.primary}
-                textColor={theme.colors.onSurface}
-                style={styles.paperInput}
-              />
-            </View>
+            <LocationPicker venue={venue} setVenue={setVenue} />
           </View>
 
           {/* Section 2: Timing & Capacity */}

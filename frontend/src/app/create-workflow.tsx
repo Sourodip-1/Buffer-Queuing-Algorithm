@@ -12,6 +12,9 @@ import { TimePickerModal } from 'react-native-paper-dates';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Animated, { FadeIn, FadeOut, Layout, SlideInDown, SlideOutDown, useAnimatedStyle, useDerivedValue, withTiming } from 'react-native-reanimated';
 import api from '../services/api';
+import LocationPicker from '../components/LocationPicker';
+
+
 
 type WorkflowQueue = {
   id: string;
@@ -42,6 +45,7 @@ export default function CreateWorkflowPage() {
   // Basic Info
   const [workflowName, setWorkflowName] = useState('');
   const [description, setDescription] = useState('');
+  const [venue, setVenue] = useState('');
   const [coverPhotoUri, setCoverPhotoUri] = useState<string | null>(null);
   const [isWorkflowEnabled, setIsWorkflowEnabled] = useState(true);
 
@@ -404,21 +408,28 @@ export default function CreateWorkflowPage() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage} activeOpacity={0.8}>
-            {coverPhotoUri ? (
-              <View style={{ width: '100%', height: '100%', borderRadius: 12, overflow: 'hidden' }}>
-                <Image source={{ uri: coverPhotoUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-                <View style={{ position: 'absolute', bottom: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', padding: 6, borderRadius: 20 }}>
-                  <MaterialIcons name="edit" size={16} color="#fff" />
-                </View>
-              </View>
-            ) : (
-              <>
-                <MaterialIcons name="add-photo-alternate" size={32} color={theme.colors.outline} />
-                <Text style={styles.imagePlaceholderText}>Add Workflow Cover Photo</Text>
-              </>
-            )}
-          </TouchableOpacity>
+          {coverPhotoUri ? (
+            <View style={[styles.imagePlaceholder, { borderWidth: 0, padding: 0 }]}>
+              <Image source={{ uri: coverPhotoUri }} style={{ width: '100%', height: '100%', borderRadius: 12 }} resizeMode="cover" />
+              <TouchableOpacity 
+                style={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', padding: 6, borderRadius: 20 }}
+                onPress={() => setCoverPhotoUri(null)}
+              >
+                <MaterialIcons name="close" size={16} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={{ position: 'absolute', bottom: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', padding: 6, borderRadius: 20 }}
+                onPress={pickImage}
+              >
+                <MaterialIcons name="edit" size={16} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.imagePlaceholder} onPress={pickImage} activeOpacity={0.8}>
+              <MaterialIcons name="add-photo-alternate" size={32} color={theme.colors.outline} />
+              <Text style={styles.imagePlaceholderText}>Add Workflow Cover Photo</Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.inputGroup}>
             <TextInput
@@ -448,6 +459,7 @@ export default function CreateWorkflowPage() {
               style={styles.paperInput}
             />
           </View>
+          <LocationPicker venue={venue} setVenue={setVenue} />
         </View>
 
         {/* Section 2: Timing & Capacity */}

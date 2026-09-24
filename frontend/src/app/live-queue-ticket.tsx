@@ -20,6 +20,9 @@ import { theme } from '../theme/theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { BlurView } from 'expo-blur';
+
+const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
 export default function LiveQueueTicket() {
   const router = useRouter();
@@ -60,6 +63,18 @@ export default function LiveQueueTicket() {
   const drawerY = useRef(new Animated.Value(DRAWER_FULL_HEIGHT - DRAWER_PEEK_HEIGHT)).current;
   const drawerOpen = useRef(false);
 
+  const blurOpacity = drawerY.interpolate({
+    inputRange: [0, DRAWER_FULL_HEIGHT - DRAWER_PEEK_HEIGHT],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const blurIntensity = drawerY.interpolate({
+    inputRange: [0, DRAWER_FULL_HEIGHT - DRAWER_PEEK_HEIGHT],
+    outputRange: [60, 0],
+    extrapolate: 'clamp',
+  });
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -79,7 +94,7 @@ export default function LiveQueueTicket() {
             toValue: 0,
             friction: 8,
             tension: 40,
-            useNativeDriver: true
+            useNativeDriver: false
           }).start();
         } else if (gestureState.dy > 50 || gestureState.vy > 0.5) {
           drawerOpen.current = false;
@@ -87,14 +102,14 @@ export default function LiveQueueTicket() {
             toValue: DRAWER_FULL_HEIGHT - DRAWER_PEEK_HEIGHT,
             friction: 8,
             tension: 40,
-            useNativeDriver: true
+            useNativeDriver: false
           }).start();
         } else {
           Animated.spring(drawerY, {
             toValue: drawerOpen.current ? 0 : DRAWER_FULL_HEIGHT - DRAWER_PEEK_HEIGHT,
             friction: 8,
             tension: 40,
-            useNativeDriver: true
+            useNativeDriver: false
           }).start();
         }
       }
@@ -455,6 +470,16 @@ export default function LiveQueueTicket() {
           </View>
         )}
       </ScrollView>
+
+      {/* --- BACKGROUND BLUR FOR DRAWER --- */}
+      {activeSection === 'history' && (
+        <AnimatedBlurView
+          intensity={blurIntensity as any}
+          tint="dark"
+          style={[StyleSheet.absoluteFill, { opacity: blurOpacity, zIndex: 90 }]}
+          pointerEvents="none"
+        />
+      )}
 
       {/* --- DRAGGABLE BOTTOM DRAWER (PAST QUEUES) --- */}
       {activeSection === 'history' && (
