@@ -58,6 +58,10 @@ export default function DevNavigationButton() {
         <SafeAreaView style={styles.modalOverlay}>
           <View style={styles.modalView}>
             <Text style={styles.modalTitle}>Dev Navigation</Text>
+
+            <TouchableOpacity onPress={() => { setModalVisible(false); router.push('/login'); }}>
+              <Text style={styles.link}>Login Page</Text>
+            </TouchableOpacity>
             
             <TouchableOpacity onPress={() => { setModalVisible(false); router.push('/customer-dashboard'); }}>
               <Text style={styles.link}>Customer Dashboard</Text>
